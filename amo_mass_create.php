@@ -3,42 +3,14 @@ include 'amo_aut.php';
 //ищем Enums мультиселекта
 function multitext_find($id){
   $link = 'https://ko609.amocrm.ru/api/v2/account?with=custom_fields';
-  $curl = curl_init();
-  curl_setopt($curl, CURLOPT_RETURNTRANSFER,true);
-  curl_setopt($curl, CURLOPT_USERAGENT, "amoCRM-API-client-undefined/2.0");
-  curl_setopt($curl, CURLOPT_URL, $link);
-  curl_setopt($curl, CURLOPT_HEADER,false);
-  curl_setopt($curl,CURLOPT_COOKIEFILE,dirname(__FILE__)."/cookie.txt");
-  curl_setopt($curl,CURLOPT_COOKIEJAR,dirname(__FILE__)."/cookie.txt");
-  $out = curl_exec($curl);
-  $code=curl_getinfo($curl,CURLINFO_HTTP_CODE);
-  curl_close($curl);
-  $code=(int)$code;
-  $errors=array(
-    301=>'Moved permanently',
-    400=>'Bad request',
-    401=>'Unauthorized',
-    403=>'Forbidden',
-    404=>'Not found',
-    500=>'Internal server error',
-    502=>'Bad gateway',
-    503=>'Service unavailable'
-  );
-  try
-  {
-   if($code!=200 && $code!=204)
-      throw new Exception(isset($errors[$code]) ? $errors[$code] : 'Undescribed error',$code);
+  $result=req_curl(0,$link);
+  if (isset($result['ooops']['errors']['code'])){
+    return $result;
   }
-  catch(Exception $E)
-  {
-    die('Ошибка: '.$E->getMessage().PHP_EOL.'Код ошибки: '.$E->getCode());
-  }
-  $result = json_decode($out,TRUE);
   $result = $result['_embedded']['custom_fields']['contacts'][$id]['enums'];
   foreach ($result as $key => $value) {
     $enums[]=$key;;
   };
-  amo_stop_time();
   return $enums;
 };
 
@@ -66,46 +38,14 @@ function multitext_add(){
    )
   );
   $link='https://ko609.amocrm.ru/api/v2/fields';
-  $curl=curl_init(); 
-  curl_setopt($curl,CURLOPT_RETURNTRANSFER,true);
-  curl_setopt($curl,CURLOPT_USERAGENT,'amoCRM-API-client-undefined/2.0');
-  curl_setopt($curl,CURLOPT_URL,$link);
-  curl_setopt($curl,CURLOPT_CUSTOMREQUEST,'POST');
-  curl_setopt($curl,CURLOPT_POSTFIELDS,json_encode($fields));
-  curl_setopt($curl,CURLOPT_HTTPHEADER,array('Content-Type: application/json'));
-  curl_setopt($curl,CURLOPT_HEADER,false);
-  curl_setopt($curl,CURLOPT_COOKIEFILE,dirname(__FILE__).'/cookie.txt'); 
-  curl_setopt($curl,CURLOPT_COOKIEJAR,dirname(__FILE__).'/cookie.txt'); 
-  curl_setopt($curl,CURLOPT_SSL_VERIFYPEER,0);
-  curl_setopt($curl,CURLOPT_SSL_VERIFYHOST,0);
-  $out=curl_exec($curl); 
-  $code=curl_getinfo($curl,CURLINFO_HTTP_CODE);
-  $code=(int)$code;
-  $errors=array(
-    301=>'Moved permanently',
-    400=>'Bad request',
-    401=>'Unauthorized',
-    403=>'Forbidden',
-    404=>'Not found',
-    500=>'Internal server error',
-    502=>'Bad gateway',
-    503=>'Service unavailable'
-  );
-  try
-  {
-   if($code!=200 && $code!=204)
-      throw new Exception(isset($errors[$code]) ? $errors[$code] : 'Undescribed error',$code);
+  $result=req_curl(1,$link,$fields);
+  if (isset($result['ooops']['errors']['code'])){
+    return $result;
   }
-  catch(Exception $E)
-  {
-    die('Ошибка: '.$E->getMessage().PHP_EOL.'Код ошибки: '.$E->getCode());
-  }
-  $Response=json_decode($out,true);
-  $Response=$Response['_embedded']['items'];
-  foreach($Response as $v)
+  $result=$result['_embedded']['items'];
+  foreach($result as $v)
     if(is_array($v))
     $output=$v['id'];
-  amo_stop_time();
   return $output;
 };
 
@@ -131,44 +71,11 @@ function contacts_upd($cont_id,$field_id, $enums){
       }
     };
     $link = "https://ko609.amocrm.ru/api/v2/contacts";
-    $curl=curl_init();
-    curl_setopt($curl,CURLOPT_RETURNTRANSFER,true);
-    curl_setopt($curl,CURLOPT_USERAGENT,'amoCRM-API-client-undefined/2.0');
-    curl_setopt($curl,CURLOPT_URL,$link);
-    curl_setopt($curl,CURLOPT_CUSTOMREQUEST,'POST');
-    curl_setopt($curl,CURLOPT_POSTFIELDS,json_encode($data));
-    curl_setopt($curl,CURLOPT_HTTPHEADER,array('Content-Type: application/json'));
-    curl_setopt($curl,CURLOPT_HEADER,false);
-    curl_setopt($curl,CURLOPT_COOKIEFILE,dirname(__FILE__).'/cookie.txt'); 
-    curl_setopt($curl,CURLOPT_COOKIEJAR,dirname(__FILE__).'/cookie.txt'); 
-    curl_setopt($curl,CURLOPT_SSL_VERIFYPEER,0);
-    curl_setopt($curl,CURLOPT_SSL_VERIFYHOST,0);
-    $out=curl_exec($curl);
-    $code=curl_getinfo($curl,CURLINFO_HTTP_CODE);
-    $code=(int)$code; 
-    $errors=array(
-      301=>'Moved permanently',
-      400=>'Bad request',
-      401=>'Unauthorized',
-      403=>'Forbidden',
-      404=>'Not found',
-      500=>'Internal server error',
-      502=>'Bad gateway',
-      503=>'Service unavailable'
-    );
-    try
-    {
-     if($code!=200 && $code!=204)
-        throw new Exception(isset($errors[$code]) ? $errors[$code] : 'Undescribed error',$code);
+    $result=req_curl(1,$link,$data);
+    if (isset($result['ooops']['errors']['code'])){
+      return $result;
     }
-    catch(Exception $E)
-    {
-      die('Ошибка: '.$E->getMessage().PHP_EOL.'Код ошибки: '.$E->getCode());
-    }
-    $result[] = json_decode($out,TRUE);
-    amo_stop_time();
   };
-  return $result;
 };
 
 //добавляем заданное количество контактов и возвращаем их id
@@ -193,47 +100,14 @@ function contacts_add($num = "1",$field_id, $enums){
     };
 
     $link='https://ko609.amocrm.ru/api/v2/contacts/';
-    $curl=curl_init();
-    curl_setopt($curl,CURLOPT_RETURNTRANSFER,true);
-    curl_setopt($curl,CURLOPT_USERAGENT,'amoCRM-API-client-undefined/2.0');
-    curl_setopt($curl,CURLOPT_URL,$link);
-    curl_setopt($curl,CURLOPT_CUSTOMREQUEST,'POST');
-    curl_setopt($curl,CURLOPT_POSTFIELDS,json_encode($data));
-    curl_setopt($curl,CURLOPT_HTTPHEADER,array('Content-Type: application/json'));
-    curl_setopt($curl,CURLOPT_HEADER,false);
-    curl_setopt($curl,CURLOPT_COOKIEFILE,dirname(__FILE__).'/cookie.txt'); 
-    curl_setopt($curl,CURLOPT_COOKIEJAR,dirname(__FILE__).'/cookie.txt'); 
-    curl_setopt($curl,CURLOPT_SSL_VERIFYPEER,0);
-    curl_setopt($curl,CURLOPT_SSL_VERIFYHOST,0);
-    $out=curl_exec($curl);
-    $code=curl_getinfo($curl,CURLINFO_HTTP_CODE);
-    $code=(int)$code;
-    $errors=array(
-      301=>'Moved permanently',
-      400=>'Bad request',
-      401=>'Unauthorized',
-      403=>'Forbidden',
-      404=>'Not found',
-      500=>'Internal server error',
-      502=>'Bad gateway',
-      503=>'Service unavailable'
-    );
-    try
-    {
-     if($code!=200 && $code!=204) {
-        throw new Exception(isset($errors[$code]) ? $errors[$code] : 'Undescribed error',$code);
-      }
+    $result=req_curl(1,$link,$data);
+    if (isset($result['ooops']['errors']['code'])){
+      return $result;
     }
-    catch(Exception $E)
-    {
-      die('Ошибка: '.$E->getMessage().PHP_EOL.'Код ошибки: '.$E->getCode());
-    }
-      $Response=json_decode($out,true);
-      $Response=$Response['_embedded']['items'];
-      foreach($Response as $v)
+    $result=$result['_embedded']['items'];
+    foreach($result as $v)
       $cont_id[]=$v['id'];
-      amo_stop_time();
-  };
+    };
     return $cont_id;
 };
 
@@ -254,46 +128,13 @@ function companies_add($num = "1", $cont_id){
     };
 
     $link='https://ko609.amocrm.ru/api/v2/companies';
-    $curl=curl_init();
-    curl_setopt($curl,CURLOPT_RETURNTRANSFER,true);
-    curl_setopt($curl,CURLOPT_USERAGENT,'amoCRM-API-client-undefined/2.0');
-    curl_setopt($curl,CURLOPT_URL,$link);
-    curl_setopt($curl,CURLOPT_CUSTOMREQUEST,'POST');
-    curl_setopt($curl,CURLOPT_POSTFIELDS,json_encode($data));
-    curl_setopt($curl,CURLOPT_HTTPHEADER,array('Content-Type: application/json'));
-    curl_setopt($curl,CURLOPT_HEADER,false);
-    curl_setopt($curl,CURLOPT_COOKIEFILE,dirname(__FILE__).'/cookie.txt'); 
-    curl_setopt($curl,CURLOPT_COOKIEJAR,dirname(__FILE__).'/cookie.txt'); 
-    curl_setopt($curl,CURLOPT_SSL_VERIFYPEER,0);
-    curl_setopt($curl,CURLOPT_SSL_VERIFYHOST,0);
-    $out=curl_exec($curl);
-    $code=curl_getinfo($curl,CURLINFO_HTTP_CODE);
-    $code=(int)$code;
-    $errors=array(
-      301=>'Moved permanently',
-      400=>'Bad request',
-      401=>'Unauthorized',
-      403=>'Forbidden',
-      404=>'Not found',
-      500=>'Internal server error',
-      502=>'Bad gateway',
-      503=>'Service unavailable'
-    );
-    try
-    {
-     if($code!=200 && $code!=204) {
-        throw new Exception(isset($errors[$code]) ? $errors[$code] : 'Undescribed error',$code);
-      }
+    $result=req_curl(1,$link,$data);
+    if (isset($result['ooops']['errors']['code'])){
+      return $result;
     }
-    catch(Exception $E)
-    {
-      die('Ошибка: '.$E->getMessage().PHP_EOL.'Код ошибки: '.$E->getCode());
-    }
-      $Response=json_decode($out,true);
-      $Response=$Response['_embedded']['items'];
-      foreach($Response as $v)
+    $result=$result['_embedded']['items'];
+    foreach($result as $v)
       $comp_id[]=$v['id'];
-      amo_stop_time();
   };
     return $comp_id;
 };
@@ -322,43 +163,10 @@ function leads_custom_add($num = "1", $cont_id, $comp_id, $type){
       $data['add'][$j+($n*$max_size)]['company_id']=$comp_id[$j+($n*$max_size)];
     };
 
-    $curl=curl_init();
-    curl_setopt($curl,CURLOPT_RETURNTRANSFER,true);
-    curl_setopt($curl,CURLOPT_USERAGENT,'amoCRM-API-client-undefined/2.0');
-    curl_setopt($curl,CURLOPT_URL,$link);
-    curl_setopt($curl,CURLOPT_CUSTOMREQUEST,'POST');
-    curl_setopt($curl,CURLOPT_POSTFIELDS,json_encode($data));
-    curl_setopt($curl,CURLOPT_HTTPHEADER,array('Content-Type: application/json'));
-    curl_setopt($curl,CURLOPT_HEADER,false);
-    curl_setopt($curl,CURLOPT_COOKIEFILE,dirname(__FILE__).'/cookie.txt'); 
-    curl_setopt($curl,CURLOPT_COOKIEJAR,dirname(__FILE__).'/cookie.txt'); 
-    curl_setopt($curl,CURLOPT_SSL_VERIFYPEER,0);
-    curl_setopt($curl,CURLOPT_SSL_VERIFYHOST,0);
-    $out=curl_exec($curl);
-    $code=curl_getinfo($curl,CURLINFO_HTTP_CODE);
-    $code=(int)$code;
-    $errors=array(
-      301=>'Moved permanently',
-      400=>'Bad request',
-      401=>'Unauthorized',
-      403=>'Forbidden',
-      404=>'Not found',
-      500=>'Internal server error',
-      502=>'Bad gateway',
-      503=>'Service unavailable'
-    );
-    try
-    {
-     if($code!=200 && $code!=204) {
-        throw new Exception(isset($errors[$code]) ? $errors[$code] : 'Undescribed error',$code);
-      }
+    $result=req_curl(1,$link,$data);
+    if (isset($result['ooops']['errors']['code'])){
+      return $result;
     }
-    catch(Exception $E)
-    {
-      die('Ошибка: '.$E->getMessage().PHP_EOL.'Код ошибки: '.$E->getCode());
-    }
-      $Response=json_decode($out,true);
-      amo_stop_time();
   };
 };
 
@@ -369,44 +177,16 @@ function contacts_get($field_id, $enums){
   $cont_id=array();
   do {
     $link = 'https://ko609.amocrm.ru/api/v2/leads?limit_rows=500&limit_offset='.$limit_offset;
-    $curl = curl_init();
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER,true);
-    curl_setopt($curl, CURLOPT_USERAGENT, "amoCRM-API-client-undefined/2.0");
-    curl_setopt($curl, CURLOPT_URL, $link);
-    curl_setopt($curl, CURLOPT_HEADER,false);
-    curl_setopt($curl,CURLOPT_COOKIEFILE,dirname(__FILE__)."/cookie.txt");
-    curl_setopt($curl,CURLOPT_COOKIEJAR,dirname(__FILE__)."/cookie.txt");
-    $out = curl_exec($curl);
-    $code=curl_getinfo($curl,CURLINFO_HTTP_CODE); 
-    curl_close($curl);
-    $code=(int)$code;
-    $errors=array(
-      301=>'Moved permanently',
-      400=>'Bad request',
-      401=>'Unauthorized',
-      403=>'Forbidden',
-      404=>'Not found',
-      500=>'Internal server error',
-      502=>'Bad gateway',
-      503=>'Service unavailable'
-    );
-    try
-    {
-     if($code!=200 && $code!=204)
-        throw new Exception(isset($errors[$code]) ? $errors[$code] : 'Undescribed error',$code);
+    $result=req_curl(0,$link);
+    if (isset($result['ooops']['errors']['code'])){
+      return $result;
     }
-    catch(Exception $E)
-    {
-      die('Ошибка: '.$E->getMessage().PHP_EOL.'Код ошибки: '.$E->getCode());
-    }
-    $result = json_decode($out,TRUE);
     if (is_array($result)){
       $result = $result['_embedded']['items'];
       foreach ($result as $key => $value) {
         $cont_id[]=$value["id"];
       };
     };
-    amo_stop_time();
     $limit_offset+=$rows_range;
   }while(is_array($result));
   
@@ -429,8 +209,8 @@ function amo_mass_create($num){
   echo "готово";
 };
 
-amo_mass_create($_POST['num']);
-
+//amo_mass_create($_POST['num']);
+amo_mass_create(3);
 ?>
 
 
