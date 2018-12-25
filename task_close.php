@@ -9,9 +9,7 @@ function task_add($task_id, $text){
   $link='https://ko609.amocrm.ru/api/v2/tasks';
   
   $result=req_curl(1,$link,$data);
-  if (isset($result['ooops']['errors']['code'])){
-    return $result;
-  }
+
   return $result;
 }
 var_dump(task_add($_POST['id'], $_POST['text']));

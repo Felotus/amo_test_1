@@ -48,10 +48,6 @@ function req_curl($type,$link,$data = null){
   catch(Exception $E)
   {
     die('Ошибка, что то пошло не так'.$E->getCode().'  '.$E->getMessage());
-    //$result['ooops']['errors']['code']=$E->getCode();
-    //$result['ooops']['errors']['text']=$E->getMessage();
-    //usleep(142857);
-    //return $result;
   }
   $result = json_decode($out,TRUE);
   usleep(142857);

@@ -24,9 +24,7 @@ function event_add($elem_id, $elem_type, $note_type, $text){
   $link='https://ko609.amocrm.ru/api/v2/notes';
   
   $result=req_curl(1,$link,$data);
-  if (isset($result['ooops']['errors']['code'])){
-    return $result;
-  }
+
 };
 
 event_add($_POST['id'],$_POST['elem_type'],$_POST['note_type'],$_POST['text']);

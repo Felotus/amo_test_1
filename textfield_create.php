@@ -24,9 +24,7 @@ function textfield_find($type){
   $textfield_id=0;
   $link = 'https://ko609.amocrm.ru/api/v2/account?with=custom_fields';
   $result=req_curl(0,$link);
-    if (isset($result['ooops']['errors']['code'])){
-      return $result;
-  }
+
   $result = $result['_embedded']['custom_fields'][$type_str];
   foreach ($result as $key => $value) {
     if ($value['field_type']==1){
@@ -49,9 +47,7 @@ function textfield_create($type){
   );
   $link='https://ko609.amocrm.ru/api/v2/fields';
   $result=req_curl(0,$link);
-    if (isset($result['ooops']['errors']['code'])){
-      return $result;
-  }
+
   $result=$result['_embedded']['items'];
   foreach($result as $v)
     if(is_array($v))
@@ -83,9 +79,7 @@ function textfield_update($type,$elem_id, $field_id, $str){
   $data['update'][0]['custom_fields'][0]['id']=$field_id;
   $data['update'][0]['custom_fields'][0]['values'][0]['value']=$str;
   $result=req_curl(1,$link,$data);
-  if (isset($result['ooops']['errors']['code'])){
-    return $result;
-  }
+
   return $result;
 };
 $id = textfield_find($_POST['elem_type']);

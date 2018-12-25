@@ -4,9 +4,6 @@ include 'amo_aut.php';
 function multitext_find($id){
   $link = 'https://ko609.amocrm.ru/api/v2/account?with=custom_fields';
   $result=req_curl(0,$link);
-  if (isset($result['ooops']['errors']['code'])){
-    return $result;
-  }
   $result = $result['_embedded']['custom_fields']['contacts'][$id]['enums'];
   foreach ($result as $key => $value) {
     $enums[]=$key;;
@@ -39,9 +36,6 @@ function multitext_add(){
   );
   $link='https://ko609.amocrm.ru/api/v2/fields';
   $result=req_curl(1,$link,$fields);
-  if (isset($result['ooops']['errors']['code'])){
-    return $result;
-  }
   $result=$result['_embedded']['items'];
   foreach($result as $v)
     if(is_array($v))
@@ -72,9 +66,6 @@ function contacts_upd($cont_id,$field_id, $enums){
     };
     $link = "https://ko609.amocrm.ru/api/v2/contacts";
     $result=req_curl(1,$link,$data);
-    if (isset($result['ooops']['errors']['code'])){
-      return $result;
-    }
   };
 };
 
@@ -101,14 +92,11 @@ function contacts_add($num = "1",$field_id, $enums){
 
     $link='https://ko609.amocrm.ru/api/v2/contacts/';
     $result=req_curl(1,$link,$data);
-    if (isset($result['ooops']['errors']['code'])){
-      return $result;
-    }
     $result=$result['_embedded']['items'];
     foreach($result as $v)
-      $cont_id[]=$v['id'];
-    };
-    return $cont_id;
+      $comp_id[]=$v['id'];
+  };
+  return $cont_id;
 };
 
 //добавляем заданное количество компаний и возвращаем их id
@@ -129,9 +117,6 @@ function companies_add($num = "1", $cont_id){
 
     $link='https://ko609.amocrm.ru/api/v2/companies';
     $result=req_curl(1,$link,$data);
-    if (isset($result['ooops']['errors']['code'])){
-      return $result;
-    }
     $result=$result['_embedded']['items'];
     foreach($result as $v)
       $comp_id[]=$v['id'];
@@ -164,9 +149,6 @@ function leads_custom_add($num = "1", $cont_id, $comp_id, $type){
     };
 
     $result=req_curl(1,$link,$data);
-    if (isset($result['ooops']['errors']['code'])){
-      return $result;
-    }
   };
 };
 
@@ -178,9 +160,6 @@ function contacts_get($field_id, $enums){
   do {
     $link = 'https://ko609.amocrm.ru/api/v2/leads?limit_rows=500&limit_offset='.$limit_offset;
     $result=req_curl(0,$link);
-    if (isset($result['ooops']['errors']['code'])){
-      return $result;
-    }
     if (is_array($result)){
       $result = $result['_embedded']['items'];
       foreach ($result as $key => $value) {
@@ -209,8 +188,7 @@ function amo_mass_create($num){
   echo "готово";
 };
 
-//amo_mass_create($_POST['num']);
-amo_mass_create(3);
+amo_mass_create($_POST['num']);
 ?>
 
 

@@ -17,9 +17,6 @@ function task_add($elem_id, $elem_type, $task_type, $text, $datetime){
   $link='https://ko609.amocrm.ru/api/v2/tasks';
   
   $result=req_curl(1,$link,$data);
-  if (isset($result['ooops']['errors']['code'])){
-    return $result;
-  }
 };
 
 task_add($_POST['id'],$_POST['elem_type'],$_POST['task_type'],$_POST['text'],client_time($_POST['date']));
