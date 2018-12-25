@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Первое задание</title>
+        
+    </head>
+    <body>
+        <div id="cont">
+            <select id="sel1" >
+              <option disabled>Выберите запрос</option>
+              <option selected value="1">создание сущностей</option>
+              <option value="2">заполнить текстовое поле</option>
+              <option value="3">добавить примечание/звонок</option>
+              <option value="4">добавить задачу </option>
+              <option value="5">закрыть задачу</option>
+            </select></br>
+            <select id="sel2" >
+              <option disabled>тип сущности</option>
+              <option selected value="1">контакт</option>
+              <option value="2">сделка</option>
+              <option value="3">компания</option>
+              <option value="12">покупатель</option>
+            </select></br>
+            <select id="sel3" >
+              <option disabled>тип примечания</option>
+              <option selected value="4">примечание</option>
+              <option value="10">входящий звонок</option>
+            </select></br>
+            <select id="sel4" >
+              <option disabled>тип задачи</option>
+            </select></br>
+            <input type="number" min="0" max="10000" step="1" id="num1" ></br>
+            <input type="number" min="0" step="1" id="num2" ></br>
+            <textarea id="textar1" ></textarea></br>
+            <input type="text" id="phone1" ></br>
+            <input type="datetime-local" id="date1" ></br>
+            <button id='6'>Отправить</button>        
+          </div>
+        <script src="/js/jquery.js"></script>
+        <script src="/js/test.js"></script>
+    </body>
+</html>
