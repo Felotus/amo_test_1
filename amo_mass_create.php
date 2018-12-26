@@ -13,14 +13,14 @@ function multitext_find($id, $link){
 
 //создаем мультиселект
 function multitext_add($link, $hash){
-	$fields['add'] = array(
-	 array(
+	$fields['add'] = [
+		[
 			'name' => "Выбери значение",
 			'field_type'=> 5,
 			'element_type' => 1,
 			'origin' => $hash."_".time().mt_rand(),
 			'is_editable' => 0,
-			'enums' => array(
+			'enums' => [
 				 "1 значение",
 				 "2 значение",
 				 "3 значение",
@@ -31,9 +31,9 @@ function multitext_add($link, $hash){
 				 "8 значение",
 				 "9 значение",
 				 "10 значение"
-			)
-	 )
-	);
+            ]
+        ]
+    ];
 	$link=$link.'/api/v2/fields';
 	$result=req_curl(POST_REQ, $link, $fields);
 	if (is_array($result)) {
@@ -62,7 +62,7 @@ function contacts_get($field_id, array $enums, $link, $max_row){
 			contacts_upd($cont_id, $field_id, $enums, $link);
 		}
 				$limit_offset+=$max_row;
-	}while(is_array($result));	
+	} while (is_array($result));	
 };
 
 
@@ -75,16 +75,16 @@ function contacts_upd(array $cont_id, $field_id, array $enums, $link){
 				$enums_data[]=$val;
 			}
 		}
-		$data['update'][]= array(
+		$data['update'][]= [
 			'id' => $v,
 			'updated_at'=> time(),
-			'custom_fields' => array(
-				'0' => array(	
+			'custom_fields' => [
+				'0' => [
 					'id' => $field_id,
 					'values' => $enums_data
-				)
-			)
-		);
+                ]
+            ]
+        ];
 	}
 	$links = $link."/api/v2/contacts";
 	$result=req_curl(POST_REQ, $links, $data);
@@ -130,12 +130,12 @@ function contacts_add($num, $field_id, array $enums, $link, $max_row){
 //добавляем заданное количество компаний и возвращаем их id
 function companies_add(array $cont_id, $link){ 
 	foreach ($cont_id as $v) {
-		$data['add'][]= array(
+		$data['add'][]= [
 			'name' => mt_rand(),
-			'contacts_id'=> array(
+			'contacts_id'=> [
 				'0'=> $v
-			)
-		);
+            ]
+        ];
 	}
 	$links=$link.'/api/v2/companies';
 	$result=req_curl(POST_REQ, $links, $data);
@@ -153,7 +153,6 @@ function companies_add(array $cont_id, $link){
 
 //добавляет сделки или покупателей в зависимости от выбранного типа
 function leads_custom_add(array $cont_id, array $comp_id, $type,$link){
-	$data= array();
 	if ($type==LEADS_TYPE) {
 		$links=$link."/api/v2/leads";
 	} else {
@@ -186,7 +185,7 @@ function amo_mass_create($num,$link, $mail, $hash, $max_row){
 try {
 	amo_mass_create($_POST['num'], $link, $mail, $hash, $max_row);
 } catch ( Exception $e ) {
-	echo "Произошла ошибка: ".$e->getMessage()." Код: ".$e->getCode();
+	echo "Произошла ошибка: ".$e->getMessage().PHP_EOL." Код: ".$e->getCode();
 }
 
 

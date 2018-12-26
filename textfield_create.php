@@ -40,14 +40,14 @@ function textfield_find($type, $link){
 
 //создаем текстовую строку
 function textfield_create($type, $link, $hash){
-	$fields['add'] = array(
-	 array(
+	$fields['add'] = [
+	    [
 			'name' => "Текстовое поле",
 			'field_type'=> 1,
 			'element_type' => $type,
 			'origin' => $hash."_".time(),
-	 )
-	);
+        ]
+	];
 	$links=$link.'/api/v2/fields';
 	$result=req_curl(POST_REQ, $links, $fields);
 	if (is_array($result)) {

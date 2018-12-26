@@ -47,6 +47,8 @@ function req_curl($type, $link, $data = null){
 			} else {
 				throw new Exception('Undescribed error',$code);
 			};
+		} elseif ($code=429) {
+			sleep(1);
 		}
 			
 
@@ -58,6 +60,7 @@ function req_curl($type, $link, $data = null){
 		throw new Exception('Сервер прислал неожиданный ответ', 007);
 	}
 	return $result;
+		}
 };
 
 // авторизация
