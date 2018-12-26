@@ -1,7 +1,6 @@
 <?php
 include 'amo_aut.php';
-amo_aut();
-function event_add($elem_id, $elem_type, $note_type, $text){
+function event_add($elem_id, $elem_type, $note_type, $text, $hash, $link){
   $data['add'][0]['element_id']=$elem_id;
   $data['add'][0]['element_type']=$elem_type;
   $data['add'][0]['note_type']=$note_type;
@@ -10,7 +9,7 @@ function event_add($elem_id, $elem_type, $note_type, $text){
       $data['add'][0]['text']=$text;
       break;
     case '10':
-      $data['add'][0]['params']['UNIQ']="8aa9ee7d3c33de7d873308e5f2afe4d5689f38be_".time().mt_rand();
+      $data['add'][0]['params']['UNIQ']=$hash."_".time().mt_rand();
       $data['add'][0]['params']['DURATION']="30";
       $data['add'][0]['params']['SRC']="http://example.com/calls/1.mp3";
       $data['add'][0]['params']['LINK']="http://example.com/calls/1.mp3";
@@ -20,14 +19,16 @@ function event_add($elem_id, $elem_type, $note_type, $text){
       $data['add'][0]['text']=$text;
       break;
   }
-  $data['add'][0]['text']=$text;
-  $link='https://ko609.amocrm.ru/api/v2/notes';
+  $links=$link.'/api/v2/notes';
   
-  $result=req_curl(1,$link,$data);
+  $result=req_curl(POST_REQ, $links, $data);
 
 };
 
-event_add($_POST['id'],$_POST['elem_type'],$_POST['note_type'],$_POST['text']);
-echo "готово";
-
-?>
+try {
+  amo_aut($link, $mail, $hash);
+  event_add($_POST['id'], $_POST['elem_type'], $_POST['note_type'], $_POST['text'], $hash, $link);
+  echo "готово";
+} catch ( Exception $e ) {
+  echo "Произошла ошибка: ".$e->getMessage().PHP_EOL." Код: ".$e->getCode();
+}
