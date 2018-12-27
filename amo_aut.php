@@ -39,28 +39,22 @@ function req_curl($type, $link, $data = null){
 		500=>'Internal server error',
 		502=>'Bad gateway',
 		503=>'Service unavailable'
-    ];
+   ];
 
-		if ($code!=200 && $code!=204){
+		if ($code!=200 && $code!=204) {
 			if (isset($errors[$code])) {
-				throw new Exception($errors[$code],$code);
+				throw new Exception($errors[$code], $code);
 			} else {
-				throw new Exception('Undescribed error',$code);
+				throw new Exception('Undescribed error', $code);
 			};
-		} elseif ($code=429) {
+		} elseif ($code==429) {
 			sleep(1);
+			return req_curl($type, $link, $data);
 		}
 			
 
 	$result = json_decode($out,TRUE);
-	if (is_array($result)) {
-
-	}
-	else {
-		throw new Exception('Сервер прислал неожиданный ответ', 007);
-	}
 	return $result;
-		}
 };
 
 // авторизация
