@@ -31,19 +31,20 @@ function multitext_add($link, $hash){
 				 "8 значение",
 				 "9 значение",
 				 "10 значение"
-            ]
-        ]
-    ];
+			]
+		]
+	];
 	$link=$link.'/api/v2/fields';
 	$result=req_curl(POST_REQ, $link, $fields);
+	
 	if (is_array($result)) {
 		$result=$result['_embedded']['items'];
 		foreach($result as $v){
 			$output=$v['id'];
 		}
 	} else {
-    throw new Exception('Сервер прислал неожиданный ответ', 007);
-  }
+		throw new Exception('Сервер прислал неожиданный ответ', 007);
+	}
 	return $output;
 };
 
@@ -82,9 +83,9 @@ function contacts_upd(array $cont_id, $field_id, array $enums, $link){
 				'0' => [
 					'id' => $field_id,
 					'values' => $enums_data
-                ]
-            ]
-        ];
+				]
+			]
+		];
 	}
 	$links = $link."/api/v2/contacts";
 	$result=req_curl(POST_REQ, $links, $data);
@@ -134,8 +135,8 @@ function companies_add(array $cont_id, $link){
 			'name' => mt_rand(),
 			'contacts_id'=> [
 				'0'=> $v
-            ]
-        ];
+						]
+				];
 	}
 	$links=$link.'/api/v2/companies';
 	$result=req_curl(POST_REQ, $links, $data);
@@ -145,6 +146,7 @@ function companies_add(array $cont_id, $link){
 			$comp_id[]=$v['id'];
 		}
 	} else {
+				
 		throw new Exception('Сервер прислал неожиданный ответ', 007);
 	}
 	return $comp_id;
