@@ -1,16 +1,18 @@
 <?php
-include 'amo_aut.php';
 function task_close($task_id, $text, $link){
-	$data['update'][0]['id']=$task_id;
-	$data['update'][0]['is_completed']=1;
-	$data['update'][0]['updated_at']=time();
-	$data['update'][0]['text']=$text;
-	$links=$link.'/api/v2/tasks'; 
-	$result=req_curl(POST_REQ, $links, $data);
+	$data['update'][] = [
+		'id' => $task_id,
+		'is_completed' => 1,
+		'updated_at' => time(),
+		'text' => $text
+	];
+	$links  = $link.'/api/v2/tasks'; 
+	$result = req_curl($links, $data);
 };
 try {
-	amo_aut($link, $mail, $hash);
-	task_close($_POST['id'], $_POST['text'], $link);
+	include 'amo_aut.php';
+	amo_aut($config['link'], $config['mail'], $config['hash']);
+	task_close(data_clean($_POST['id']), data_clean($_POST['text']), $config['link']);
 	echo "готово";
 } catch ( Exception $e ) {
 	echo "Произошла ошибка: ".$e->getMessage().PHP_EOL." Код: ".$e->getCode();

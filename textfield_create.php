@@ -1,6 +1,4 @@
 <?php
-include 'amo_aut.php';
-
 
 //ищем текстовые строки
 function textfield_find($type, $link){
@@ -21,14 +19,14 @@ function textfield_find($type, $link){
 			$type_str = "contacts";
 			break;
 	}
-	$textfield_id=0;
+	$textfield_id = 0;
 	$links = $link.'/api/v2/account?with=custom_fields';
-	$result=req_curl(GET_REQ, $links);
+	$result = req_curl($links);
 	if (is_array($result)) {
 		$result = $result['_embedded']['custom_fields'][$type_str];
 		foreach ($result as $key => $value) {
-			if ($value['field_type']==1) {
-				$textfield_id=$key;
+			if ($value['field_type'] === 1) {
+				$textfield_id = $key;
 				break;
 			}
 		};   
@@ -48,13 +46,13 @@ function textfield_create($type, $link, $hash){
 			'origin' => $hash."_".time(),
         ]
 	];
-	$links=$link.'/api/v2/fields';
-	$result=req_curl(POST_REQ, $links, $fields);
+	$links = $link.'/api/v2/fields';
+	$result = req_curl($links, $fields);
 	if (is_array($result)) {
-		$result=$result['_embedded']['items'];
+		$result = $result['_embedded']['items'];
 		foreach ($result as $v) {
 			if (is_array($v)) {
-				$output=$v['id'];
+				$output = $v['id'];
 			}
 		}
 	} else {
@@ -82,20 +80,37 @@ function textfield_update($type,$elem_id, $field_id, $str, $link){
 		$links = $link."/api/v2/contacts";
 		break;
 	}
-	$data['update'][0]['id']=$elem_id;
-	$data['update'][0]['updated_at']=time();
-	$data['update'][0]['custom_fields'][0]['id']=$field_id;
-	$data['update'][0]['custom_fields'][0]['values'][0]['value']=$str;
-	$result=req_curl(POST_REQ, $links, $data);
+	$data['update'][] = [
+		'id' => $elem_id,
+		'updated_at' => time(),
+		'custom_fields' => [
+			[
+				'id' => $field_id,
+				'values' => [
+					[
+						'value' => $str
+					]
+				]
+			]
+		]
+	];
+	$result = req_curl($links, $data);
+	if (isset($result['_embedded']['errors'])) {		
+		throw new Exception($result['_embedded']['errors']['update'][$elem_id], 006);
+	} elseif (!isset($result['_embedded']['items'])) {
+		throw new Exception('Сервер прислал неожиданный ответ', 007);
+	}
 };
 
 try {
-	amo_aut($link, $mail, $hash);
-	$id = textfield_find($_POST['elem_type'], $link);
-	if ($id == 0){
-		$id = textfield_create($_POST['elem_type'], $link,$hash);
+	include 'amo_aut.php';
+	$elem_type = data_clean($_POST['elem_type']);
+	amo_aut($config['link'], $config['mail'], $config['hash']);
+	$id = textfield_find($elem_type, $config['link']);
+	if ($id === 0){
+		$id = textfield_create($elem_type, $config['link'], $config['hash']);
 	};
-	textfield_update($_POST['elem_type'], $_POST['id'], $id,$_POST['text'], $link);
+	textfield_update($elem_type, data_clean($_POST['id']), $id, data_clean($_POST['text']), $config['link']);
 	echo "готово";
 } catch ( Exception $e ) {
 	echo "Произошла ошибка: ".$e->getMessage().PHP_EOL." Код: ".$e->getCode();
