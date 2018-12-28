@@ -1,5 +1,7 @@
 <?php
 
+
+
 //ищем текстовые строки
 function textfield_find($type, $link){
 	switch ($type) {
