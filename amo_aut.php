@@ -270,7 +270,7 @@ class field_multitext {
 	private $_value;
 	private $_enums;
 	private $_enums_val;
-	private static $_field_type = 5;
+	private static FIELD_TYPE = 5;
 	function  __construct($id, $name, $elem_type, array $enums, array $enums_val){
 		$this->_id = $id;
 		$this->_elem_type = $elem_type;
