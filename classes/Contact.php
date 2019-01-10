@@ -12,7 +12,7 @@ class Contact{
 		$this->_id = $id;
 	}
 
-	public function massChangeFieldVal($field){
+    public function massChangeFieldVal($field){
 		if (is_object($field)){
 			$field->massChangeVal();
 		} else {
@@ -96,4 +96,5 @@ class Contact{
 		}
 	}
 }
+
 
