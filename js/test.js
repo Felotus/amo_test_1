@@ -1,192 +1,199 @@
 $(document).ready(function(){
 	
-	var current_date = new Date();
-	var time_zone = parseInt(-current_date.getTimezoneOffset() * 60);
-	$('#sel2').hide();
-	$('#sel3').hide(); 
-	$('#sel4').hide();
-	$('#textar1').hide();
-	$('#date1').hide();
-	$('#phone1').hide();
+	//let current_date = new Date();
+	let sel_el_type = $('#sel2');
+    let sel_base = $('#sel1');
+    let sel_note_type = $('#sel3');
+    let sel_task_type = $('#sel4');
+    let inp_textar1 = $('#textar1');
+    let inp_date1 = $('#date1');
+    let inp_phone1 = $('#phone1');
+    let inp_num1 = $('#num1');
+    let inp_but1 = $('#but1');
+	//var time_zone = parseInt(-current_date.getTimezoneOffset() * 60); как выяснилось сервер сам время корректирует
+    sel_el_type.hide();
+    sel_note_type.hide();
+    sel_task_type.hide();
+    inp_textar1.hide();
+    inp_date1.hide();
+    inp_phone1.hide();
 	$.ajax({
 		type: "POST",
-		type: "json",
 		url: "task_types_get.php",
 		success: function(msg){
 			msg = JSON.parse(msg);
 			$.each(msg, function(key, value){
-				
-				$('#sel4').append($('<option>', {
+
+                sel_task_type.append($('<option>', {
 					value: key,
 					text: value,
 				}));
 			})
 		}
 	});
-	$( "#sel3" ).change(function() {
-		if($('#sel3').find(":selected").val() === '4'){
-			$('#textar1').show();
-			$('#phone1').hide();
+    sel_note_type.change(function() {
+		if(sel_note_type.find(":selected").val() === '4'){
+            inp_textar1.show();
+            inp_phone1.hide();
 		}
 		else{
-			$('#textar1').hide();
-			$('#phone1').show();
+            inp_textar1.hide();
+            inp_phone1.show();
 		}
 	});
-	$ ( "#sel1" ).change(function() {
-		switch ($('#sel1').find(":selected").val()) {
-			case '1': 
-				$('#sel2').hide();
-				$('#sel3').hide(); 
-				$('#sel4').hide();
-				$('#textar1').hide();
-				$('#date1').hide();
-				$('#phone1').hide();
-				$("#num1").attr("placeholder", "количество элементов");
+    sel_base.change(function() {
+		switch (sel_base.find(":selected").val()) {
+			case '1':
+                sel_el_type.hide();
+                sel_note_type.hide();
+                sel_task_type.hide();
+                inp_textar1.hide();
+                inp_date1.hide();
+                inp_phone1.hide();
+                inp_num1.attr("placeholder", "количество элементов");
 				break;
-			case '2': 
-				$('#sel2').show();
-				$('#sel3').hide(); 
-				$('#sel4').hide();
-				$('#textar1').show();
-				$('#date1').hide();
-				$('#phone1').hide();
-				$("#num1").attr("placeholder", "введите id");
+			case '2':
+                sel_el_type.show();
+                sel_note_type.hide();
+                sel_task_type.hide();
+                inp_textar1.show();
+                inp_date1.hide();
+                inp_phone1.hide();
+                inp_num1.attr("placeholder", "введите id");
 				break;
 			case '3':
-				$('#sel2').show();
-				$('#sel3').show();
-				$('#sel4').hide();
-				$('#date1').hide();      
-				if($('#sel3').find(":selected").val() === '4'){
-					$('#textar1').show();
-					$('#phone1').hide();
+                sel_el_type.show();
+                sel_note_type.show();
+                sel_task_type.hide();
+                inp_date1.hide();
+				if(sel_note_type.find(":selected").val() === '4'){
+                    inp_textar1.show();
+                    inp_phone1.hide();
 				}
 				else{
-					$('#textar1').hide();
-					$('#phone1').show();
+                    inp_textar1.hide();
+                    inp_phone1.show();
 				}
-				$("#num1").attr("placeholder", "введите id");
+                inp_num1.attr("placeholder", "введите id");
 				break;
 			case '4':
-				$('#sel2').show();
-				$('#sel3').hide(); 
-				$('#sel4').show();
-				$('#textar1').show();
-				$('#date1').show();
-				$('#phone1').hide();
-				$("#num1").attr("placeholder", "введите id");
+                sel_el_type.show();
+                sel_note_type.hide();
+                sel_task_type.show();
+                inp_textar1.show();
+                inp_date1.show();
+                inp_phone1.hide();
+                inp_num1.attr("placeholder", "введите id");
 				break;
-			case '5': 
-				$('#sel2').hide();
-				$('#sel3').hide(); 
-				$('#sel4').hide();
-				$('#textar1').show();
-				$('#date1').hide();
-				$('#phone1').hide();
-				$("#num1").attr("placeholder", "введите id");
+			case '5':
+                sel_el_type.hide();
+                sel_note_type.hide();
+                sel_task_type.hide();
+                inp_textar1.show();
+                inp_date1.hide();
+                inp_phone1.hide();
+                inp_num1.attr("placeholder", "введите id");
 				break;
 			default:
-				$('#sel2').hide();
-				$('#sel3').hide(); 
-				$('#sel4').hide();
-				$('#textar1').hide();
-				$('#date1').hide();
-				$('#phone1').hide();
-				$("#num1").attr("placeholder", "введите id");
+                sel_el_type.hide();
+                sel_note_type.hide();
+                sel_task_type.hide();
+                inp_textar1.hide();
+                inp_date1.hide();
+                inp_phone1.hide();
+                inp_num1.attr("placeholder", "введите id");
 				break;
-		};
-	});
+        }
+    });
 
-	$("#but1").on("click", function(){
+    inp_but1.on("click", function(){
 		let link;
 		let ajdata;
-		switch ($('#sel1').find(":selected").val()) {
-			case '1': 
-				if ($("#num1").val() <= 0 || $("#num1").val() > 10000){
+		switch (sel_base.find(":selected").val()) {
+			case '1':
+				if (inp_num1.val() <= 0 || inp_num1.val() > 10000){
 					alert('значение должно быть положительным и меньше 10000');
 					return false;
-				};
-				link = "amo_mass_create.php";
+                }
+                link = "amo_mass_create.php";
 				ajdata = {
-					num : $("#num1").val()
+					num : inp_num1.val()
 				};
 				break;
-			case '2': 
-				if (!$('#num1').val() || !$('#textar1').val()) {                  
+			case '2':
+				if (!inp_num1.val() || !inp_textar1.val()) {
 					alert('заполните все поля');
 					return false;
-				};
-				link = "textfield_create.php";
+                }
+                link = "textfield_create.php";
 				ajdata = {
-					id : $("#num1").val(),
-					elem_type : $("#sel2").find(":selected").val(),
-					text : $("#textar1").val()
+					id : inp_num1.val(),
+					elem_type : sel_el_type.find(":selected").val(),
+					text : inp_textar1.val()
 				};
 				break;
 			case '3':
 				link = "event_add.php";
 				ajdata = {
-					id : $("#num1").val(),
-					elem_type : $("#sel2").find(":selected").val(),
-					note_type : $('#sel3').find(":selected").val()
+					id : inp_num1.val(),
+					elem_type : sel_el_type.find(":selected").val(),
+					note_type : sel_note_type.find(":selected").val()
 				};
-				if ($('#sel3').find(":selected").val() === '4') {
-					if ( !$('#num1').val() || !$('#textar1').val()) {                  
+				if (sel_note_type.find(":selected").val() === '4') {
+					if ( !inp_num1.val() || !inp_textar1.val()) {
 						alert('заполните все поля');
 					return false;
-					};
-					ajdata.text = $("#textar1").val();
+                    }
+                    ajdata.text = inp_textar1.val();
 				} else {
-					if( !$('#num1').val() || !$('#phone1').val()) {                  
+					if( !inp_num1.val() || !inp_phone1.val()) {
 						alert('заполните все поля');
 					return false;
-					};
-					ajdata.text = $("#phone1").val();
+                    }
+                    ajdata.text = inp_phone1.val();
 				}
 				break;
 			case '4':
-				if ( !$('#num1').val() || !$('#textar1').val() || !$('#date1').val()) {                  
+				if ( !inp_num1.val() || !inp_textar1.val() || !inp_date1.val()) {
 					alert('заполните все поля');
 					return false;
-				};
-				link = "task_add.php";
-				cur_time = (Date.parse($('#date1').val())/1000) - time_zone;
+                }
+                link = "task_add.php";
+				let cur_time = (Date.parse(inp_date1.val())/1000);
 				ajdata = {
-					id : $("#num1").val(),
-					elem_type : $("#sel2").find(":selected").val(),
-					text : $("#textar1").val(),
-					task_type : $('#sel4').find(":selected").val(),
+					id : inp_num1.val(),
+					elem_type : sel_el_type.find(":selected").val(),
+					text : inp_textar1.val(),
+					task_type : sel_task_type.find(":selected").val(),
 					date : cur_time
 				};
 				break;
-			case '5': 
-				if (!$("#num1").val()) {
+			case '5':
+				if (!inp_num1.val()) {
 					alert('заполните все поля');
 					return false;
-				};
-				link = "task_close.php";
+                }
+                link = "task_close.php";
 				ajdata = {
-					id : $("#num1").val(),
-					text : $("#textar1").val()
+					id : inp_num1.val(),
+					text : inp_textar1.val()
 				};
 				break;
 			default:
 				return false;
-				break;
-		};
-		$.ajax({
+        }
+        $.ajax({
 			type: "POST",
 			data: ajdata,
 			url: link,
 			beforeSend: function(){
-				$('#but1').attr('disabled', true);
+				inp_but1.attr('disabled', true);
 			},
 			success: function(msg){
 				alert(msg);
 			},
 			complete: function(){
-				$('#but1').attr('disabled', false);
+				inp_but1.attr('disabled', false);
 			}
 		});
 	});
