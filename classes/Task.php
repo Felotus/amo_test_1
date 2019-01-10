@@ -36,6 +36,7 @@ class Task{
 	}
 
 	public function getTaskTypes(){
+        $task = [];
 		$result = Acc::get($this->_creator, ['task_types']);
 		$result = $result['_embedded']['task_types'];
 		foreach ($result as $key => $value) {
@@ -44,3 +45,4 @@ class Task{
 		return $task;
 	}
 }
+

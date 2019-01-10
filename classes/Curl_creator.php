@@ -90,5 +90,5 @@ class Curl_creator{
 		$links = $this->_link."/api/v2/".$link;
 		return $this->reqCurl($links);			
 	}
-};
+}
 

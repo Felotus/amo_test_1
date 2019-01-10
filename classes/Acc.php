@@ -13,3 +13,4 @@ class Acc{
 		return $curl->get($links);
 	}
 }
+
