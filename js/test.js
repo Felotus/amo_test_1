@@ -1,6 +1,4 @@
 $(document).ready(function(){
-	
-	//let current_date = new Date();
 	let sel_el_type = $('#sel2');
     let sel_base = $('#sel1');
     let sel_note_type = $('#sel3');
@@ -10,7 +8,8 @@ $(document).ready(function(){
     let inp_phone1 = $('#phone1');
     let inp_num1 = $('#num1');
     let inp_but1 = $('#but1');
-	//var time_zone = parseInt(-current_date.getTimezoneOffset() * 60); как выяснилось сервер сам время корректирует
+	$('#sel1 option:eq(1)').prop('selected', true);
+  	sel_base.prop('selected', true);
     sel_el_type.hide();
     sel_note_type.hide();
     sel_task_type.hide();
