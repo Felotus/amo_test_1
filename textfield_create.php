@@ -1,121 +1,35 @@
 <?php
-
-
-
-//ищем текстовые строки
-function textfield_find($type, $link){
-	switch ($type) {
+try {
+	function __autoload($className){
+		$className = str_replace( "..", "", $className );
+		require_once( "classes/$className.php" );
+	}
+	$field_name = 'новое поле';
+	define('TEXTFIELD_TYPE', 1);
+	$config = include('../config.php');
+	$amo_us = new Curl_creator($config['akk'], $config['mail'], $config['hash'], $config['max_row']);
+	$amo_us->auth();
+	switch ($_POST['elem_type']) {
 		case 1:
-			$type_str = "contacts";
+			$elem = new Contact($amo_us);
 			break;
 		case 3:
-			$type_str = "companies";
+			$elem = new Company($amo_us);
 			break;
 		case 2:
-			$type_str = "leads";
+			$elem = new Lead($amo_us);
 			break;
 		case 12:
-			$type_str = "customers";
+			$elem = new Customer($amo_us);
 			break;
 		default:
-			$type_str = "contacts";
+			throw new Exception('Элемент не найден', 88);
 			break;
-	}
-	$textfield_id = 0;
-	$links = $link.'/api/v2/account?with=custom_fields';
-	$result = req_curl($links);
-	if (is_array($result)) {
-		$result = $result['_embedded']['custom_fields'][$type_str];
-		foreach ($result as $key => $value) {
-			if ($value['field_type'] === 1) {
-				$textfield_id = $key;
-				break;
-			}
-		};   
-	} else {
-		throw new Exception('Сервер прислал неожиданный ответ', 007);
-	}
-	return  $textfield_id;
-};
-
-//создаем текстовую строку
-function textfield_create($type, $link, $hash){
-	$fields['add'] = [
-	    [
-			'name' => "Текстовое поле",
-			'field_type'=> 1,
-			'element_type' => $type,
-			'origin' => $hash."_".time(),
-        ]
-	];
-	$links = $link.'/api/v2/fields';
-	$result = req_curl($links, $fields);
-	if (is_array($result)) {
-		$result = $result['_embedded']['items'];
-		foreach ($result as $v) {
-			if (is_array($v)) {
-				$output = $v['id'];
-			}
-		}
-	} else {
-		throw new Exception('Сервер прислал неожиданный ответ', 007);
-	}
-	return $output;
-};
-
-//заполняем текстовое поле
-function textfield_update($type,$elem_id, $field_id, $str, $link){
-	switch ($type) {
-	case 1:
-		$links = $link."/api/v2/contacts";
-		break;
-	case 3:
-		$links = $link."/api/v2/companies";
-		break;
-	case 2:
-		$links = $link."/api/v2/leads";
-		break;
-	case 12:
-		$links = $link."/api/v2/customers";
-		break;
-	default:
-		$links = $link."/api/v2/contacts";
-		break;
-	}
-	$data['update'][] = [
-		'id' => $elem_id,
-		'updated_at' => time(),
-		'custom_fields' => [
-			[
-				'id' => $field_id,
-				'values' => [
-					[
-						'value' => $str
-					]
-				]
-			]
-		]
-	];
-	$result = req_curl($links, $data);
-	if (isset($result['_embedded']['errors'])) {		
-		throw new Exception($result['_embedded']['errors']['update'][$elem_id], 006);
-	} elseif (!isset($result['_embedded']['items'])) {
-		throw new Exception('Сервер прислал неожиданный ответ', 007);
-	}
-};
-
-try {
-	include 'amo_aut.php';
-	$elem_type = data_clean($_POST['elem_type']);
-	amo_aut($config['link'], $config['mail'], $config['hash']);
-	$id = textfield_find($elem_type, $config['link']);
-	if ($id === 0){
-		$id = textfield_create($elem_type, $config['link'], $config['hash']);
 	};
-	textfield_update($elem_type, data_clean($_POST['id']), $id, data_clean($_POST['text']), $config['link']);
+	$elem->set($amo_us->cleanData($_POST['id']));
+	$elem->changeFirsField(TEXTFIELD_TYPE, $amo_us->cleanData($_POST['text']), $field_name);
 	echo "готово";
 } catch ( Exception $e ) {
 	echo "Произошла ошибка: ".$e->getMessage().PHP_EOL." Код: ".$e->getCode();
 }
-
 	

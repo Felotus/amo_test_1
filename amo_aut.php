@@ -129,7 +129,7 @@ class amo_user {
 		}	
 		return new field_multitext($multi_id, $name, $elem_type, $enums, $enums_val);
 	}
-	public function update_rand_all_multitext($field_id, $elem_rype array $enums){
+	public function update_rand_all_multitext($field_id, $elem_type array $enums){
 		$limit_offset = 0;
 		switch ($elem_type) {
 			case 1:

@@ -24,11 +24,10 @@ try {
 		'значение 10',
 	];
 	$cont = new Contact($amo_us);
-	$multi = $cont->addField(5, 'Мультиполе12', $enums_val);
-	$multi->get_id();
-	$multi->get_enums();
-	$cont->massCreate($_POST['num']);
-	echo 'готово';
+	$multi = $cont->addField(MULTI_TYPE, 'Мультиполе333', NULL, $enums_val);
+	$cont->massCreate($amo_us->cleanData($_POST['num']));
+	$cont->massChangeFieldVal($multi);
+	echo "готово";
 } catch ( Exception $e ) {
 	echo "Произошла ошибка: ".$e->getMessage().PHP_EOL." Код: ".$e->getCode();
 }
