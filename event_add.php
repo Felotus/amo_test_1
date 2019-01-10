@@ -25,7 +25,7 @@ try {
 			throw new Exception('Элемент не найден', 88);
 			break;
 	};
-	$elem->set($amo_us->cleanData($_POST['id']);
+	$elem->set($amo_us->cleanData($_POST['id']));
 	$elem->addNote($amo_us->cleanData($_POST['note_type']), $amo_us->cleanData($_POST['text']));
 	echo "готово";
 } catch ( Exception $e ) {

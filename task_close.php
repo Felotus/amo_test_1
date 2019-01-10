@@ -13,3 +13,4 @@ try {
 } catch ( Exception $e ) {
 	echo "Произошла ошибка: ".$e->getMessage().PHP_EOL." Код: ".$e->getCode();
 };
+

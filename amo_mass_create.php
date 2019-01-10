@@ -32,8 +32,3 @@ try {
 	echo "Произошла ошибка: ".$e->getMessage().PHP_EOL." Код: ".$e->getCode();
 }
 
-
-
-
-
-

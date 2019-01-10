@@ -24,8 +24,8 @@ try {
 			throw new Exception('Элемент не найден', 88);
 			break;
 	};
-	$elem->set($amo_us->cleanData($_POST['id']);
-	$elem->addTask($amo_us->cleanData($_POST['task_type']), $amo_us->cleanData($_POST['text']), $amo_us->cleanData($_POST['date']);
+	$elem->set($amo_us->cleanData($_POST['id']));
+	$elem->addTask($amo_us->cleanData($_POST['task_type']), $amo_us->cleanData($_POST['text']), $amo_us->cleanData($_POST['date']));
 	echo "готово";
 } catch ( Exception $e ) {
 	echo "Произошла ошибка: ".$e->getMessage().PHP_EOL." Код: ".$e->getCode();
