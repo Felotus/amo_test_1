@@ -18,7 +18,7 @@ class Curl_creator{
 	public function get_max_row(){
 		return $this->_max_row;
 	}
-	private function req_curl($link, array $data = NULL){
+	private function reqCurl($link, array $data = NULL){
 		$curl = curl_init();
 		curl_setopt($curl, CURLOPT_RETURNTRANSFER,true);
 		curl_setopt($curl, CURLOPT_USERAGENT, "amoCRM-API-client-undefined/2.0");
@@ -56,13 +56,17 @@ class Curl_creator{
 			}
 		} elseif ($code === 429) {
 			sleep(3);
-			return $this->req_curl($link, $data);
+			return $this->reqCurl($link, $data);
 		}
 		$result = json_decode($out,TRUE);	
 		return $result;
 	}
 
-	
+	function cleanData($value = ""){
+	    $value = trim($value);
+	    $value = htmlspecialchars($value);  
+	    return $value;
+	}
 
 	public function auth(){
 		$data = [
@@ -70,7 +74,7 @@ class Curl_creator{
 			'USER_HASH' => $this->_hash
 		];
 		$link = $this->_link."/private/api/auth.php?type=json";
-        $result = $this->req_curl($link, $data);
+        $result = $this->reqCurl($link, $data);
 		$result = $result['response'];
 		if (!isset($result['auth'])) {
 			throw new Exception('Авторизация не прошла', 666);
@@ -79,12 +83,12 @@ class Curl_creator{
 
 	public function add($link, array $data){
 		$links = $this->_link."/api/v2/".$link;
-		return $this->req_curl($links, $data);			
+		return $this->reqCurl($links, $data);			
 	}
 
 	public function get($link){
 		$links = $this->_link."/api/v2/".$link;
-		return $this->req_curl($links);			
+		return $this->reqCurl($links);			
 	}
 };
 
