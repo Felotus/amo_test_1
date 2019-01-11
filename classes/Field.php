@@ -34,7 +34,7 @@ class Field{
 		return $this->_type;
 	}
 
-	public function get__elem_type(){
+	public function get_elem_type(){
 		return self::ELEM_TYPE;
 	}
 }
