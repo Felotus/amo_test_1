@@ -9,8 +9,6 @@ try {
 		throw new Exception('Файл конфига не найден', 69);	
 	}
 	$config = include('../config.php');
-	$amo_us = new AmoConstruct($config['api']);
-	$amo_us->auth($config['akk'], $config['mail'], $config['hash'], $config['max_row']);
 	$enums_val = [
 		'значение 1',
 		'значение 2',
@@ -23,9 +21,60 @@ try {
 		'значение 9',
 		'значение 10',
 	];
-	$multi = new Field(MULTI_TYPE, 'Мультиполе333', $enums_val);
+	$field_name = 'Мультиполе';
+	$num = DataFilter::clear($_POST['num']);
+
+	$amo_us = new AmoConstruct($config['api']);
+	$amo_us->auth($config['akk'], $config['mail'], $config['hash'], $config['max_row']);
+	$multi = new Field();	
+	$multi->set_type(MULTI_TYPE);
+	$multi->set_name($field_name);
+	$multi->set_enums($enums_val);
 	$multi = $amo_us->createField(Contact::ELEM_TYPE, $multi);
-	$amo_us->massCreateElem($_POST['num']);
+	$max_row = $amo_us->get_max_row();
+	for ($i = $num, $n = 0; $i > 0; $i -= $max_row, $n++) {
+	$contacts = [];
+	$companies = [];
+	$customers = [];
+	$leads = [];
+	$elem = '';
+	$name = '';
+		if ($i > $max_row) {
+			$col = $max_row;
+		} else {
+			$col = $i;
+		}
+		for ($j = 0; $j < $col; $j++) {
+			$elem = new Contact();
+			$name = mt_rand();
+			$data['add'][] = [
+				'name' => $name,
+			];
+			$elem->set_name($name);
+			$contacts[] = $elem;
+		};
+		$contacts = $amo_us->createContacts($contacts);
+		foreach ($contacts as $k => $v) {
+			$companies[$k] = new Company();
+			$companies[$k]->set_name(mt_rand());
+			$companies[$k]->set_contacts([$contacts[$k]->get_id()]);
+		}
+		$companies = $amo_us->createCompanies($companies);
+		foreach ($contacts as $k => $v) {
+			$leads[$k] = new lead();
+			$leads[$k]->set_name(mt_rand());
+			$leads[$k]->set_contacts([$contacts[$k]->get_id()]);
+			$leads[$k]->set_company($companies[$k]->get_id());
+		}
+		$amo_us->createCustLeads($leads);
+		foreach ($contacts as $k => $v) {
+			$customers[$k] = new Customer();
+			$customers[$k]->set_name(mt_rand());
+			$customers[$k]->set_contacts([$contacts[$k]->get_id()]);
+			$customers[$k]->set_company($companies[$k]->get_id());
+		}
+		$amo_us->createCustLeads($customers);
+	}
 	$amo_us->massChangeMultisVal(Contact::ELEM_TYPE, $multi);
 	echo "готово";
 } catch ( Exception $e ) {

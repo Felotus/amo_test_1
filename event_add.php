@@ -6,27 +6,30 @@ try {
 	}
 	$config = include('../config.php');
 	$elem_name = 'случайное имя';
-	$elem_id = $_POST['id'];
+	$elem_id = DataFilter::clear($_POST['id']);
 	$amo_us = new AmoConstruct($config['api']);
 	$amo_us->auth($config['akk'], $config['mail'], $config['hash'], $config['max_row']);
-	switch ($_POST['elem_type']) {
+	switch (DataFilter::clear($_POST['elem_type'])) {
 		case Contact::ELEM_TYPE:
-			$elem = new Contact($elem_name, $elem_id);
+			$elem = new Contact();
 			break;
 		case Company::ELEM_TYPE:
-			$elem = new Company($elem_name, $elem_id);
+			$elem = new Company();
 			break;
 		case Lead::ELEM_TYPE:
-			$elem = new Lead($elem_name, $elem_id);
+			$elem = new Lead();
 			break;
 		case Customer::ELEM_TYPE:
-			$elem = new Customer($elem_name, $elem_id);
+			$elem = new Customer();
 			break;
 		default:
 			throw new Exception('Элемент не найден', 88);
 			break;
 	};
-	$note = new Note($_POST['note_type'], $_POST['text']);
+	$elem->set_id($elem_id);
+	$note = new Note();
+	$note->set_type(DataFilter::clear($_POST['note_type']));
+	$note->set_val(DataFilter::clear($_POST['text']));
 	$amo_us->createNote($elem, $note);
 	echo "готово";
 } catch ( Exception $e ) {

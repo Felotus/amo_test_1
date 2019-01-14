@@ -7,30 +7,32 @@ try {
 	$config = include('../config.php');
 	$field_name = 'новое поле';
 	define('TEXTFIELD_TYPE', 1);
-	$elem_name = 'случайное имя';
-	$elem_id = $_POST['id'];
+	$elem_id = DataFilter::clear($_POST['id']);
 	$amo_us = new AmoConstruct($config['api']);
 	$amo_us->auth($config['akk'], $config['mail'], $config['hash'], $config['max_row']);
-	switch ($_POST['elem_type']) {
+	switch (DataFilter::clear($_POST['elem_type'])) {
 		case Contact::ELEM_TYPE:
-			$elem = new Contact($elem_name, $elem_id);
+			$elem = new Contact();
 			break;
 		case Company::ELEM_TYPE:
-			$elem = new Company($elem_name, $elem_id);
+			$elem = new Company();
 			break;
 		case Lead::ELEM_TYPE:
-			$elem = new Lead($elem_name, $elem_id);
+			$elem = new Lead();
 			break;
 		case Customer::ELEM_TYPE:
-			$elem = new Customer($elem_name, $elem_id);
+			$elem = new Customer();
 			break;
 		default:
 			throw new Exception('Элемент не найден', 88);
 			break;
 	};
-	$field = new Field(TEXTFIELD_TYPE, $field_name);
+	$elem->set_id($elem_id);
+	$field = new Field();
+	$field->set_type(TEXTFIELD_TYPE);
+	$field->set_name($field_name);
 	$field = $amo_us->findFirsField($elem, $field);
-	$amo_us->changeFieldVal($elem, $_POST['text'], $field);
+	$amo_us->changeFieldVal($elem, DataFilter::clear($_POST['text']), $field);
 	echo "готово";
 } catch ( Exception $e ) {
 	echo "Произошла ошибка: ".$e->getMessage().PHP_EOL." Код: ".$e->getCode();
