@@ -14,12 +14,21 @@ class AmoConstruct extends CurlReq {
 		'multiselect' => 5
 	];
 
-	public function get_max_row(){
+    /**
+     * @return mixed
+     */
+    public function get_max_row(){
 		return $this->_max_row;
 	}
 
-
-	public function auth($akk, $mail, $hash, $max_row){
+    /**
+     * @param $akk
+     * @param $mail
+     * @param $hash
+     * @param $max_row
+     * @throws Exception
+     */
+    public function auth($akk, $mail, $hash, $max_row){
 		$this->_hash = $hash;
 		$this->_link = "https://".$akk.".amocrm.ru/";
 		$this->_max_row = $max_row;
@@ -35,7 +44,13 @@ class AmoConstruct extends CurlReq {
 		}
 	}
 
-	public function createField($elem_type, Field $field){
+    /**
+     * @param $elem_type
+     * @param Field $field
+     * @return Field
+     * @throws Exception
+     */
+    public function createField($elem_type, Field $field){
 		$origin = $this->_hash.'_'.time().'_'.mt_rand();
 		$field_id = NULL;
 		$enums = NULL;
@@ -76,7 +91,11 @@ class AmoConstruct extends CurlReq {
 		return $field;
 	}
 
-	private function accReq(array $params = null){
+    /**
+     * @param array|null $params
+     * @return mixed
+     */
+    private function accReq(array $params = null){
 		$link = $this->_link.'api/v2/account';
 		if (!is_null($params)){
 			$link .= '?with=';
@@ -88,7 +107,13 @@ class AmoConstruct extends CurlReq {
 		return $this->get($link);
 	}
 
-	public function changeFieldVal(AmoElem $elem, $val, Field $field){
+    /**
+     * @param AmoElem $elem
+     * @param $val
+     * @param Field $field
+     * @throws Exception
+     */
+    public function changeFieldVal(AmoElem $elem, $val, Field $field){
 		if ($field->get_type() !== $this->_field_types['multiselect']) {
 			$val = [
 				'value' => $val
@@ -114,10 +139,13 @@ class AmoConstruct extends CurlReq {
 		}
 	}
 
-	public function massChangeMultisVal($elem_type, Field $field){
+    /**
+     * @param $elem_type
+     * @param Field $field
+     */
+    public function massChangeMultisVal($elem_type, Field $field){
 		$limit_offset = 0;
 		do {
-			$cont_id = [];
 			$link = $this->_link.'api/v2/'.$this->_elem_links[$elem_type].'?limit_rows='.$this->_max_row.'&limit_offset='.$limit_offset;
 			$result = $this->get($link);
 			if (is_array($result)) {
@@ -146,7 +174,12 @@ class AmoConstruct extends CurlReq {
 		} while (is_array($result));
 	}
 
-	public function createElems(array $elems){
+    /**
+     * @param array $elems AmoElem
+     * @return array
+     * @throws Exception
+     */
+    public function createElems(array $elems){
 		$data = [];
 		foreach ($elems as $k => $v) {
 			$data['add'][$k]['name'] = $elems[$k]->get_name();
@@ -170,7 +203,12 @@ class AmoConstruct extends CurlReq {
 	}
 
 
-	public function createCustLeads(array $elems){
+    /**
+     * @param array $elems AmoElem
+     * @return array
+     * @throws Exception
+     */
+    public function createCustLeads(array $elems){
 		$data = [];
 		foreach ($elems as $k => $v) {
 			$data['add'][$k] = [
@@ -191,7 +229,12 @@ class AmoConstruct extends CurlReq {
 		}
 	}
 
-	public function createCompanies(array $elems){
+    /**
+     * @param array $elems AmoElem
+     * @return array
+     * @throws Exception
+     */
+    public function createCompanies(array $elems){
 		$data = [];
 		foreach ($elems as $k => $v) {
 			$data['add'][] = [
@@ -211,7 +254,12 @@ class AmoConstruct extends CurlReq {
 		}
 	}
 
-	public function createContacts(array $elems){
+    /**
+     * @param array $elems AmoElem
+     * @return array
+     * @throws Exception
+     */
+    public function createContacts(array $elems){
 		$data = [];
 		foreach ($elems as $k => $v) {
 			$data['add'][] = [
@@ -230,7 +278,13 @@ class AmoConstruct extends CurlReq {
 		}
 	}
 
-	public function findFirsField(AmoElem $elem, Field $field){
+    /**
+     * @param AmoElem $elem
+     * @param Field $field
+     * @return Field
+     * @throws Exception
+     */
+    public function findFirsField(AmoElem $elem, Field $field){
 		$id = NULL;
 		$enums = NULL;
 		$result = $this->accReq(['custom_fields']);
@@ -258,7 +312,12 @@ class AmoConstruct extends CurlReq {
 		} 
 	}
 
-	public function createNote(AmoElem $elem, Note $note){
+    /**
+     * @param AmoElem $elem
+     * @param Note $note
+     * @throws Exception
+     */
+    public function createNote(AmoElem $elem, Note $note){
 		$note->set_origin($this->_hash.'_'.time().'_'.mt_rand());
 		$data['add'][] = [
 			'element_id' => $elem->get_id(),
@@ -270,7 +329,7 @@ class AmoConstruct extends CurlReq {
 				$data['add'][0]['text'] = $note->get_val();
 				break;
 			case '10':
-				$data['add'][0]['params']['UNIQ'] = $note->get_origin();
+                $data['add'][0]['params']['UNIQ'] = $note->get_origin();
 				$data['add'][0]['params']['DURATION'] = 30;
 				$data['add'][0]['params']['SRC'] = 'http://example.com/calls/1.mp3';
 				$data['add'][0]['params']['LINK'] = 'http://example.com/calls/1.mp3';
@@ -288,7 +347,10 @@ class AmoConstruct extends CurlReq {
 		}
 	}
 
-	public function getTaskTypes(){
+    /**
+     * @return array
+     */
+    public function getTaskTypes(){
 		$tasks = [];
 		$result = $this->accReq(['task_types']);
 		$result = $result['_embedded']['task_types'];
@@ -298,7 +360,11 @@ class AmoConstruct extends CurlReq {
 		return $tasks;
 	}
 
-	public function createTask(AmoElem $elem, Task $task){
+    /**
+     * @param AmoElem $elem
+     * @param Task $task
+     */
+    public function createTask(AmoElem $elem, Task $task){
 		$data['add'][] = [
 			'element_id' => $elem->get_id(),
 			'element_type' => $elem->get_type(),
@@ -306,16 +372,19 @@ class AmoConstruct extends CurlReq {
 			'complete_till' => $task->get_date(),
 			'text' => $task->get_val()
 		];
-		$result = $this->post($this->_link.'api/v2/tasks', $data);
+		$this->post($this->_link.'api/v2/tasks', $data);
 	}
 
-	public function closeTask(Task $task){
-		$data['update'][] = [
+    /**
+     * @param Task $task
+     */
+    public function closeTask(Task $task){
+        $data['update'][] = [
 			'id' => $task->get_id(),
 			'is_completed' => 1,
 			'updated_at' => time(),
 			'text' => $task->get_val()
 		];
-		$result = $this->post($this->_link.'api/v2/tasks', $data);
+        $this->post($this->_link.'api/v2/tasks', $data);
 	}
 }
