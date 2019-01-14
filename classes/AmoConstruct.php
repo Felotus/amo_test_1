@@ -3,13 +3,15 @@ class AmoConstruct extends CurlReq {
 	private $_link;
 	private $_hash;
 	private $_max_row;
-	private $_elem_links = [1 => 'contacts',
-							2 => 'leads',
-							3 => 'companies',
-							12 => 'customers',
+	private $_elem_links = [
+		1 => 'contacts',
+		2 => 'leads',
+		3 => 'companies',
+		12 => 'customers',
 	];
-	private $_field_types = ['text' => 1,
-							'multiselect' => 5
+	private $_field_types = [
+		'text' => 1,
+		'multiselect' => 5
 	];
 
 	public function get_max_row(){
@@ -144,10 +146,34 @@ class AmoConstruct extends CurlReq {
 		} while (is_array($result));
 	}
 
+	public function createElems(array $elems){
+		$data = [];
+		foreach ($elems as $k => $v) {
+			$data['add'][$k]['name'] = $elems[$k]->get_name();
+			if (property_exists($elems[$k], '_company')){
+				$data['add'][$k]['company_id'] = $elems[$k]->get_company();
+			}
+			if (property_exists($elems[$k], '_contacts')){
+				$data['add'][$k]['contacts_id'] = $elems[$k]->get_contacts();
+			}
+		}
+		$result = $this->post($this->_link.'api/v2/'.$this->_elem_links[$elems[0]->get_type()], $data);
+		if (is_array($result)) {
+			$result = $result['_embedded']['items'];
+			foreach ($result as $k => $v) {
+				$elems[$k]->set_id($v['id']);
+			}
+			return $elems;
+		} else {
+			throw new Exception('Сервер прислал неожиданный ответ', 7);
+		}
+	}
+
+
 	public function createCustLeads(array $elems){
 		$data = [];
 		foreach ($elems as $k => $v) {
-			$data['add'][] = [
+			$data['add'][$k] = [
 				'name' => $elems[$k]->get_name(),
 				'company_id' => $elems[$k]->get_company(),
 				'contacts_id'=> $elems[$k]->get_contacts()
