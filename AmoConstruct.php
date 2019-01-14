@@ -3,20 +3,31 @@ class AmoConstruct extends CurlReq {
 	private $_link;
 	private $_hash;
 	private $_max_row;
-	private $_elem_links = [1 => 'contacts',
-							2 => 'leads',
-							3 => 'companies',
-							12 => 'customers',
-							20 => 'account',
-							22 => 'notes',
-							25 => 'tasks',
-							30 => 'fields'
+	private $_elem_links = [
+		1 => 'contacts',
+		2 => 'leads',
+		3 => 'companies',
+		12 => 'customers',
 	];
-	private $_field_types = ['text' => 1,
-							'multiselect' => 5
+	private $_field_types = [
+		'text' => 1,
+		'multiselect' => 5
 	];
 
+	/**
+	 * @return mixed
+	 */
+	public function get_max_row(){
+		return $this->_max_row;
+	}
 
+	/**
+	 * @param $akk
+	 * @param $mail
+	 * @param $hash
+	 * @param $max_row
+	 * @throws Exception
+	 */
 	public function auth($akk, $mail, $hash, $max_row){
 		$this->_hash = $hash;
 		$this->_link = "https://".$akk.".amocrm.ru/";
@@ -26,13 +37,19 @@ class AmoConstruct extends CurlReq {
 			'USER_HASH' => $this->_hash
 		];
 		$link = $this->_link."private/api/auth.php?type=json";
-		$result = $this->add($link, $data);
+		$result = $this->post($link, $data);
 		$result = $result['response'];
 		if (!isset($result['auth'])) {
 			throw new Exception('Авторизация не прошла', 666);
 		}
 	}
 
+	/**
+	 * @param $elem_type
+	 * @param Field $field
+	 * @return Field
+	 * @throws Exception
+	 */
 	public function createField($elem_type, Field $field){
 		$origin = $this->_hash.'_'.time().'_'.mt_rand();
 		$field_id = NULL;
@@ -47,7 +64,7 @@ class AmoConstruct extends CurlReq {
 				'is_editable' => 1
 			]
 		];
-		$result = $this->add($this->_link.'api/v2/'.$this->_elem_links[$field->get_elem_type()], $data);
+		$result = $this->post($this->_link.'api/v2/fields', $data);
 		$field_id = NULL;
 		if (is_array($result)) {
 			$result = $result['_embedded']['items'];
@@ -68,11 +85,18 @@ class AmoConstruct extends CurlReq {
 				throw new Exception('Сервер прислал неожиданный ответ', 7);
 			}
 		}
-		return $field = new Field($field->get_type(), $field->get_name(), $enums, $field_id, $origin);
+		$field->set_enums($enums);
+		$field->set_id($field_id);
+		$field->set_origin($origin);
+		return $field;
 	}
 
+	/**
+	 * @param array|null $params
+	 * @return mixed
+	 */
 	private function accReq(array $params = null){
-		$link = $this->_link.'api/v2/'.$this->_elem_links[Acc::ELEM_TYPE];
+		$link = $this->_link.'api/v2/account';
 		if (!is_null($params)){
 			$link .= '?with=';
 			foreach ($params as $key => $value) {
@@ -83,7 +107,13 @@ class AmoConstruct extends CurlReq {
 		return $this->get($link);
 	}
 
-	public function changeFieldVal($elem, $val, Field $field){
+	/**
+	 * @param AmoElem $elem
+	 * @param $val
+	 * @param Field $field
+	 * @throws Exception
+	 */
+	public function changeFieldVal(AmoElem $elem, $val, Field $field){
 		if ($field->get_type() !== $this->_field_types['multiselect']) {
 			$val = [
 				'value' => $val
@@ -101,7 +131,7 @@ class AmoConstruct extends CurlReq {
 				]
 			]
 		];
-		$result = $this->add($this->_link.'api/v2/'.$this->_elem_links[$elem->get_type()], $data);
+		$result = $this->post($this->_link.'api/v2/'.$this->_elem_links[$elem->get_type()], $data);
 		if (isset($result['_embedded']['errors']['update'][$elem->get_id()])) {
 			throw new Exception($result['_embedded']['errors']['update'][$elem->get_id()], 6);
 		} elseif (!isset($result['_embedded']['items'])) {
@@ -109,10 +139,13 @@ class AmoConstruct extends CurlReq {
 		}
 	}
 
+	/**
+	 * @param $elem_type
+	 * @param Field $field
+	 */
 	public function massChangeMultisVal($elem_type, Field $field){
 		$limit_offset = 0;
 		do {
-			$cont_id = [];
 			$link = $this->_link.'api/v2/'.$this->_elem_links[$elem_type].'?limit_rows='.$this->_max_row.'&limit_offset='.$limit_offset;
 			$result = $this->get($link);
 			if (is_array($result)) {
@@ -134,95 +167,124 @@ class AmoConstruct extends CurlReq {
 							]
 						]
 					];
-					$result = $this->add($this->_link.'api/v2/'.$this->_elem_links[$elem_type], $data);
+					$result = $this->post($this->_link.'api/v2/'.$this->_elem_links[$elem_type], $data);
 				};
 			}
 			$limit_offset += $this->_max_row;
 		} while (is_array($result));
 	}
 
-	public function massCreateElem($num){
-		$max_row = $this->_max_row;
-		for ($i = $num, $n = 0; $i > 0; $i -= $max_row, $n++) {
-			$cont = [];
-			$data = [];
-			$name = [];
-			if ($i > $max_row) {
-				$col = $max_row;
-			} else {
-				$col = $i;
+	/**
+	 * @param array $elems AmoElem
+	 * @return array
+	 * @throws Exception
+	 */
+	public function createElems(array $elems){
+		$data = [];
+		foreach ($elems as $k => $v) {
+			$data['add'][$k]['name'] = $elems[$k]->get_name();
+			if (property_exists($elems[$k], '_company')){
+				$data['add'][$k]['company_id'] = $elems[$k]->get_company();
 			}
-			for ($j = 0; $j < $col; $j++) {
-				$name[]=mt_rand();
-				$data['add'][] = [
-					'name' => end($name),
-				];
-			};
-			$result = $this->add($this->_link.'api/v2/'.$this->_elem_links[Contact::ELEM_TYPE], $data);
-			if (is_array($result)) {
-				$result = $result['_embedded']['items'];
-				foreach ($result as $k => $v) {
-					$cont_id[] = new Contact($name[$k], $v['id']);
-				}
-				$company = $this->massCreateCompany($cont_id);
-				$this->massCreateLead($cont_id, $company);
-				$this->massCreateCustomer($cont_id, $company);
-			} else {
-				throw new Exception('Сервер прислал неожиданный ответ1', 007);
+			if (property_exists($elems[$k], '_contacts')){
+				$data['add'][$k]['contacts_id'] = $elems[$k]->get_contacts();
 			}
 		}
-	}
-
-	private function massCreateCompany(array $cont_id){
-		$comp_id = [];
-		$name = [];
-		foreach ($cont_id as $v) {
-			$name[] = mt_rand();
-			$data['add'][] = [
-				'name' => end($name),
-				'contacts_id'=> [
-					'0'=> $v->get_id()
-				]
-			];
-		}
-		$result = $this->add($this->_link.'api/v2/'.$this->_elem_links[Company::ELEM_TYPE], $data);
-		if (is_array($result)){
+		$result = $this->post($this->_link.'api/v2/'.$this->_elem_links[$elems[0]->get_type()], $data);
+		if (is_array($result)) {
 			$result = $result['_embedded']['items'];
 			foreach ($result as $k => $v) {
-				$comp_id[] = new Company($name[$k], $v['id'], [$cont_id[$k]->get_id()]);
+				$elems[$k]->set_id($v['id']);
 			}
+			return $elems;
 		} else {
-			throw new Exception('Сервер прислал неожиданный ответ', 17);
+			throw new Exception('Сервер прислал неожиданный ответ', 7);
 		}
-		return $comp_id;
 	}
 
-	private function massCreateCustLead(array $cont_id, array $comp_id, $elem_type){
+
+	/**
+	 * @param array $elems AmoElem
+	 * @return array
+	 * @throws Exception
+	 */
+	public function createCustLeads(array $elems){
 		$data = [];
-		foreach ($cont_id as $k => $v) {
-			$data['add'][] = [
-				'name' => mt_rand(),
-				'company_id' => $comp_id[$k]->get_id(),
-				'contacts_id'=> [
-					'0' => $v->get_id()
-				]
+		foreach ($elems as $k => $v) {
+			$data['add'][$k] = [
+				'name' => $elems[$k]->get_name(),
+				'company_id' => $elems[$k]->get_company(),
+				'contacts_id'=> $elems[$k]->get_contacts()
 			];
 		}
-		$result = $this->add($this->_link.'api/v2/'.$this->_elem_links[$elem_type], $data);
-		if (!is_array($result)){
-			throw new Exception('Сервер прислал неожиданный ответ', 037);
+		$result = $this->post($this->_link.'api/v2/'.$this->_elem_links[$elems[0]->get_type()], $data);
+		if (is_array($result)) {
+			$result = $result['_embedded']['items'];
+			foreach ($result as $k => $v) {
+				$elems[$k]->set_id($v['id']);
+			}
+			return $elems;
+		} else {
+			throw new Exception('Сервер прислал неожиданный ответ', 7);
 		}
 	}
 
-	private function massCreateLead(array $cont_id, array $comp_id){
-		$this->massCreateCustLead($cont_id, $comp_id, Lead::ELEM_TYPE);
+	/**
+	 * @param array $elems AmoElem
+	 * @return array
+	 * @throws Exception
+	 */
+	public function createCompanies(array $elems){
+		$data = [];
+		foreach ($elems as $k => $v) {
+			$data['add'][] = [
+				'name' => $elems[$k]->get_name(),
+				'contacts_id'=> $elems[$k]->get_contacts()
+			];
+		}
+		$result = $this->post($this->_link.'api/v2/companies', $data);
+		if (is_array($result)) {
+			$result = $result['_embedded']['items'];
+			foreach ($result as $k => $v) {
+				$elems[$k]->set_id($v['id']);
+			}
+			return $elems;
+		} else {
+			throw new Exception('Сервер прислал неожиданный ответ', 7);
+		}
 	}
 
-	private function massCreateCustomer(array $cont_id, array $comp_id){
-		$this->massCreateCustLead($cont_id, $comp_id, Customer::ELEM_TYPE);
+	/**
+	 * @param array $elems AmoElem
+	 * @return array
+	 * @throws Exception
+	 */
+	public function createContacts(array $elems){
+		$data = [];
+		foreach ($elems as $k => $v) {
+			$data['add'][] = [
+				'name' => $elems[$k]->get_name()
+			];
+		}
+		$result = $this->post($this->_link.'api/v2/contacts', $data);
+		if (is_array($result)) {
+			$result = $result['_embedded']['items'];
+			foreach ($result as $k => $v) {
+				$elems[$k]->set_id($v['id']);
+			}
+			return $elems;
+		} else {
+			throw new Exception('Сервер прислал неожиданный ответ', 7);
+		}
 	}
 
-	public function findFirsField($elem, Field $field){
+	/**
+	 * @param AmoElem $elem
+	 * @param Field $field
+	 * @return Field
+	 * @throws Exception
+	 */
+	public function findFirsField(AmoElem $elem, Field $field){
 		$id = NULL;
 		$enums = NULL;
 		$result = $this->accReq(['custom_fields']);
@@ -235,19 +297,28 @@ class AmoConstruct extends CurlReq {
 					if (isset($value['enums'])){
 						$enums = $value['enums'];
 					}
-					return $field = new Field($field ->get_type(), $name, $enums, $id);
+					$field->set_name($name);
+					$field->set_enums($enums);
+					$field->set_id($id);
+					return $field;
 					break;
 				}
 			} 
 		} else {
-			throw new Exception('Сервер прислал неожиданный ответ', 007);
+			throw new Exception('Сервер прислал неожиданный ответ',7);
 		}
 		if (is_null($id)){
-		return $field = $this->createField($field->get_type(), $field);
+			return $field = $this->createField($elem->get_type(), $field);
 		} 
 	}
 
-	public function createNote($elem, Note $note){
+	/**
+	 * @param AmoElem $elem
+	 * @param Note $note
+	 * @throws Exception
+	 */
+	public function createNote(AmoElem $elem, Note $note){
+		$note->set_origin($this->_hash.'_'.time().'_'.mt_rand());
 		$data['add'][] = [
 			'element_id' => $elem->get_id(),
 			'element_type' => $elem->get_type(),
@@ -258,7 +329,7 @@ class AmoConstruct extends CurlReq {
 				$data['add'][0]['text'] = $note->get_val();
 				break;
 			case '10':
-				$data['add'][0]['params']['UNIQ'] = $this->_hash.'_'.time().'_'.mt_rand();
+				$data['add'][0]['params']['UNIQ'] = $note->get_origin();
 				$data['add'][0]['params']['DURATION'] = 30;
 				$data['add'][0]['params']['SRC'] = 'http://example.com/calls/1.mp3';
 				$data['add'][0]['params']['LINK'] = 'http://example.com/calls/1.mp3';
@@ -268,14 +339,17 @@ class AmoConstruct extends CurlReq {
 				$data['add'][0]['text'] = $note->get_val();
 				break;
 		}
-		$result = $this->add($this->_link.'api/v2/'.$this->_elem_links[$note->get_elem_type()], $data);
+		$result = $this->post($this->_link.'api/v2/notes', $data);
 		if (isset($result['_embedded']['items'][0]['id']) && $result['_embedded']['items'][0]['id'] === 0) {		
-			throw new Exception('не удалось найти элемент', 006);
+			throw new Exception('не удалось найти элемент', 6);
 		} elseif (!isset($result['_embedded']['items'])) {
-			throw new Exception('Сервер прислал неожиданный ответ', 007);
+			throw new Exception('Сервер прислал неожиданный ответ', 7);
 		}
 	}
 
+	/**
+	 * @return array
+	 */
 	public function getTaskTypes(){
 		$tasks = [];
 		$result = $this->accReq(['task_types']);
@@ -286,7 +360,11 @@ class AmoConstruct extends CurlReq {
 		return $tasks;
 	}
 
-	public function createTask($elem, Task $task){
+	/**
+	 * @param AmoElem $elem
+	 * @param Task $task
+	 */
+	public function createTask(AmoElem $elem, Task $task){
 		$data['add'][] = [
 			'element_id' => $elem->get_id(),
 			'element_type' => $elem->get_type(),
@@ -294,9 +372,12 @@ class AmoConstruct extends CurlReq {
 			'complete_till' => $task->get_date(),
 			'text' => $task->get_val()
 		];
-		$result = $this->add($this->_link.'api/v2/'.$this->_elem_links[$task->get_elem_type()], $data);
+		$this->post($this->_link.'api/v2/tasks', $data);
 	}
 
+	/**
+	 * @param Task $task
+	 */
 	public function closeTask(Task $task){
 		$data['update'][] = [
 			'id' => $task->get_id(),
@@ -304,6 +385,6 @@ class AmoConstruct extends CurlReq {
 			'updated_at' => time(),
 			'text' => $task->get_val()
 		];
-		$result = $this->add($this->_link.'api/v2/'.$this->_elem_links[$task->get_elem_type()], $data);
+		$this->post($this->_link.'api/v2/tasks', $data);
 	}
 }
