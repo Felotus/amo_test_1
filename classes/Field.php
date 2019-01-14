@@ -5,14 +5,21 @@ class Field{
 	private $_enums;
 	private $_origin;
 	private $_type;
-	const ELEM_TYPE = 30;
-
-	public function __construct($field_type, $name = null, array $enums_val = NULL, $id = NULL, $origin = NULL) {
-		$this->_type = $field_type;
-		$this->_name = $name;
+	
+	public function set_id($id){
 		$this->_id = $id;
-		$this->_enums = $enums_val;
+	}
+	public function set_name($name){
+		$this->_name = $name;
+	}
+	public function set_enums($enums){
+		$this->_enums = $enums;
+	}
+	public function set_origin($origin){
 		$this->_origin = $origin;
+	}
+	public function set_type($type){
+		$this->_type = $type;
 	}
 
 	public function get_id(){
@@ -32,10 +39,6 @@ class Field{
 
 	public function get_type(){
 		return $this->_type;
-	}
-
-	public function get_elem_type(){
-		return self::ELEM_TYPE;
 	}
 }
 

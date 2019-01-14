@@ -1,28 +1,21 @@
 <?php
-class Lead{
-	private $_name;
-	private $_id;
+class Lead extends AmoElem{
 	private $_contacts;
 	private $_company;
 	const ELEM_TYPE = 2;
 
-	public function __construct($name = NULL, $id = NULL, $contacts = NULL, $company = NULL){
-		$this->_id = $id;
-		$this->_name = $name;
+	public function set_contacts(array $contacts){
 		$this->_contacts = $contacts;
+	}
+	public function set_company($company){
 		$this->_company = $company;
 	}
-	
-	public function get_type(){
-		return self::ELEM_TYPE;
-	}
 
-	public function get_id(){
-		return $this->_id;
+	public function get_contacts(){
+		return $this->_contacts;
 	}
-
-	public function get_name(){
-		return $this->_name;
+	public function get_company(){
+		return $this->_company;
 	}
 }
 

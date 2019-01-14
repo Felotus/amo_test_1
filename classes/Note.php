@@ -3,16 +3,21 @@ class Note{
 	private $_type;
 	private $_val;
 	private $_id;
-	const ELEM_TYPE = 22;
+	private $_origin;
 
-	public function __construct($type = NULL, $val = NULL, $id = NULL){
-		$this->_id = $id;
-		$this->_val = $val;
-		$this->_type = $type;
+	public function set_origin($origin){
+		$this->_origin = $origin;
 	}
 
-	public function get_elem_type(){
-		return self::ELEM_TYPE;
+	public function set_id($id){
+		$this->_id = $id;
+	}
+	public function set_val($val){
+		$this->_val = $val;
+	}
+	
+	public function set_type($type){
+		$this->_type = $type;
 	}
 
 	public function get_id(){
@@ -24,6 +29,10 @@ class Note{
 	}
 	public function get_type(){
 		return $this->_type;
+	}
+
+	public function get_origin($origin){
+		return $this->_origin;
 	}
 }
 

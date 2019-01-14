@@ -51,7 +51,7 @@ class CurlReq {
 		return $result;
 	}
 
-	public function add($link, $data){
+	public function post($link, $data){
 		return $this->reqCurl($link, $data);
 	}
 

@@ -4,18 +4,20 @@ class Task{
 	private $_type;
 	private $_val;
 	private $_date;
-	const ELEM_TYPE = 25;
 
-	public function __construct($type = NULL, $val = NULL, $date = NULL, $id  = NULL){
+	public function set_id($id){
 		$this->_id = $id;
-		$this->_type = $type;
-		$this->_date = $date;
+	}
+	public function set_val($val){
 		$this->_val = $val;
 	}
-
-	public function get_elem_type(){
-		return self::ELEM_TYPE;
+	public function set_date($date){
+		$this->_date = $date;
 	}
+	public function set_type($type){
+		$this->_type = $type;
+	}
+
 
 	public function get_id(){
 		return $this->_id;
