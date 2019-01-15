@@ -35,7 +35,7 @@ class AmoConstruct extends CurlReq {
 		if (!isset($result['auth'])) {
 			throw new Exception('Авторизация не прошла', 666);
 		}
-		
+
 	}
 
 	/**
@@ -187,7 +187,7 @@ class AmoConstruct extends CurlReq {
 				$values = $val->get_values();
 				switch ($val->get_type()) {
 					case Field::TEXT:
-						$values = ['value' => $values[0]];
+						$values[] = ['value' => $values[0]];
 						break;
 					
 					case Field::MULTISELECT:
@@ -208,7 +208,10 @@ class AmoConstruct extends CurlReq {
 				'custom_fields' => $custom_fields
 			];
 		}
+		var_dump($data).PHP_EOL;
+		echo $this->_link.'api/v2/'.$this->_elem_links[$elems[0]->get_type()].PHP_EOL;
 		$result = $this->post($this->_link.'api/v2/'.$this->_elem_links[$elems[0]->get_type()], $data);
+		var_dump($result);
 	}
 
 	/**
@@ -284,13 +287,13 @@ class AmoConstruct extends CurlReq {
 	 * @return Field
 	 * @throws Exception
 	 */
-	public function findFieldOnType(AmoElem $elem, Field $field){
+	public function findFieldOnType($elem_type, Field $field){
 		$id = NULL;
 		$enums = NULL;
 		$found = FALSE;
 		$result = $this->accReq(['custom_fields']);
 		if (is_array($result)) {
-			$result = $result['_embedded']['custom_fields'][$this->_elem_links[$elem->get_type()]];
+			$result = $result['_embedded']['custom_fields'][$this->_elem_links[$elem_type]];
 			foreach ($result as $key => $value) {
 				if ($value['field_type'] === $field->get_type()) {
 					$id = $key;
@@ -308,12 +311,10 @@ class AmoConstruct extends CurlReq {
 		} else {
 			throw new Exception('Сервер прислал неожиданный ответ',7);
 		}
-		if ($found === FOLSE) {
-			 
+		if ($found === FALSE) {
+			$field->set_id($id);
 		}
-		if (is_null($id)){
-			return $field = $this->createField($elem->get_type(), $field);
-		} 
+		return $field;
 	}
 
 	/**
