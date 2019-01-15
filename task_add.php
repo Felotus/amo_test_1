@@ -9,9 +9,9 @@ try {
 	$elem_id = DataFilter::clear($_POST['id']);
 	$amo_us = new AmoConstruct($config['api']);
 	$amo_us->auth($config['akk'], $config['mail'], $config['hash'], $config['max_row']);
-	switch ($_POST['elem_type']) {
+	switch (DataFilter::clear($_POST['elem_type'])) {
 		case Contact::ELEM_TYPE:
-			$elem = new Contact($elem_id);
+			$elem = new Contact();
 			break;
 		case Company::ELEM_TYPE:
 			$elem = new Company();

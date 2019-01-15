@@ -3,7 +3,7 @@ function __autoload($className){
 	$className = str_replace( "..", "", $className );
 	require_once( "classes/$className.php" );
 }
-define('MULTI_TYPE', 5);
+define('ROW_START', 0);
 try {
 	if (!file_exists('../config.php')) {
 		throw new Exception('Файл конфига не найден', 69);	
@@ -21,17 +21,18 @@ try {
 		'значение 9',
 		'значение 10',
 	];
+	$max_row = $config['max_row'];
 	$field_name = 'Мультиполе';
 	$num = DataFilter::clear($_POST['num']);
-
 	$amo_us = new AmoConstruct($config['api']);
-	$amo_us->auth($config['akk'], $config['mail'], $config['hash'], $config['max_row']);
+	$amo_us->auth($config['akk'], $config['mail'], $config['hash']);
 	$multi = new Field();	
-	$multi->set_type(MULTI_TYPE);
+	$multi->set_type(Field::MULTISELECT);
 	$multi->set_name($field_name);
 	$multi->set_enums($enums_val);
+	$multi->set_origin($config['origin']);
 	$multi = $amo_us->createField(Contact::ELEM_TYPE, $multi);
-	$max_row = $amo_us->get_max_row();
+	$multi = $amo_us->getFieldEnums(Contact::ELEM_TYPE, $multi);
 	for ($i = $num, $n = 0; $i > 0; $i -= $max_row, $n++) {
 	$contacts = [];
 	$companies = [];
@@ -75,7 +76,25 @@ try {
 		}
 		$amo_us->createCustLeads($customers);
 	}
-	$amo_us->massChangeMultisVal(Contact::ELEM_TYPE, $multi);
+	$start_row = ROW_START;
+	do {
+		$result = $amo_us->getContacts($start_row, $max_row);
+		if (is_array($result)) {
+			foreach ($result as $key => $value) {
+				$enums_data = [];
+				$multiCont = clone($multi);
+				foreach ($multi->get_enums() as $val) {	
+					if (mt_rand(0, 1) === 1) {
+						$enums_data[] = $val;
+					}			
+				}
+				$multiCont->set_values($enums_data);
+				$result[$key]->set_custom_fields([$multiCont]);
+			}
+			$amo_us->updateElems($result);
+		}
+		$start_row += $max_row;
+	} while (is_array($result));
 	echo "готово";
 } catch ( Exception $e ) {
 	echo "Произошла ошибка: ".$e->getMessage().PHP_EOL." Код: ".$e->getCode();

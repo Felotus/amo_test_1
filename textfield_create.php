@@ -32,7 +32,9 @@ try {
 	$field->set_type(TEXTFIELD_TYPE);
 	$field->set_name($field_name);
 	$field = $amo_us->findFirsField($elem, $field);
-	$amo_us->changeFieldVal($elem, DataFilter::clear($_POST['text']), $field);
+	$field->set_values([DataFilter::clear($_POST['text'])]);
+	$elem->set_custom_fields([$field]);
+	$amo_us->updateElems($elem);
 	echo "готово";
 } catch ( Exception $e ) {
 	echo "Произошла ошибка: ".$e->getMessage().PHP_EOL." Код: ".$e->getCode();
