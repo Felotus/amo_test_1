@@ -31,10 +31,13 @@ try {
 	$field = new Field();
 	$field->set_type(TEXTFIELD_TYPE);
 	$field->set_name($field_name);
-	$field = $amo_us->findFirsField($elem, $field);
 	$field->set_values([DataFilter::clear($_POST['text'])]);
+	$field = $amo_us->findFieldOnType($elem->get_type(), $field);
+	if (is_null($field->get_id())){
+		$field = $amo_us->createField($elem->get_type(), $field);
+	}
 	$elem->set_custom_fields([$field]);
-	$amo_us->updateElems($elem);
+	$amo_us->updateElems([$elem]);
 	echo "готово";
 } catch ( Exception $e ) {
 	echo "Произошла ошибка: ".$e->getMessage().PHP_EOL." Код: ".$e->getCode();
