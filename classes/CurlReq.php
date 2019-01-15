@@ -47,7 +47,8 @@ class CurlReq {
 			sleep(3);
 			return $this->reqCurl($link, $data);
 		}
-		$result = json_decode($out,TRUE);	
+		$result = json_decode($out,TRUE);
+
 		return $result;
 	}
 

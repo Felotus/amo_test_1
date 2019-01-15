@@ -4,9 +4,22 @@ class Note{
 	private $_val;
 	private $_id;
 	private $_origin;
+	private $_call_link = 'http://example.com/calls/1.mp3';
+	private $_call_duration = 30;
+
+	public function get_call_link(){
+		return $this->_call_link;
+	}
+
+	public function get_call_duration(){
+		return $this->_call_duration;
+	}
 
 	public function set_origin($origin){
 		$this->_origin = $origin;
+	}
+	public function get_origin(){
+		return $this->_origin;
 	}
 
 	public function set_id($id){
@@ -29,10 +42,6 @@ class Note{
 	}
 	public function get_type(){
 		return $this->_type;
-	}
-
-	public function get_origin($origin){
-		return $this->_origin;
 	}
 }
 

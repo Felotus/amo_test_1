@@ -7,6 +7,7 @@ class Lead extends AmoElem{
 	public function set_contacts(array $contacts){
 		$this->_contacts = $contacts;
 	}
+	
 	public function set_company($company){
 		$this->_company = $company;
 	}
