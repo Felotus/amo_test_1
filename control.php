@@ -14,9 +14,5 @@ $req_types = [
 //ini_set('display_errors', 1);
 //error_reporting(E_ALL);
 $router = new Router();
-
-	$router->runControl(DataFilter::clear($req_types[$_POST['req_type']]));
-} catch ( Exception $e ) {
-	echo "Произошла ошибка: ".$e->getMessage().PHP_EOL." Код: ".$e->getCode();
-}
+$router->runControl(DataFilter::clear($req_types[$_POST['req_type']]));
 
