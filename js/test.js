@@ -16,9 +16,13 @@ $(document).ready( function () {
   inp_textar1.hide();
   inp_date1.hide();
   inp_phone1.hide();
+  ajdata = {
+    req_type: '0'
+  },
   $.ajax( {
     type: 'POST',
-    url: 'task_types_get.php',
+    url: 'control.php',
+    data: ajdata,
     success: function (msg) {
       msg = JSON.parse(msg);
       $.each(msg, function (key, value) {
@@ -107,9 +111,9 @@ $(document).ready( function () {
   });
 
   inp_but1.on("click", function () {
-    let link;
-    let ajdata;
-    switch (sel_base.find(":selected").val()) {
+    ajdata,
+    base_type = sel_base.find(":selected").val();
+    switch (base_type) {
       case '1':
         if (inp_num1.val() <= 0 || inp_num1.val() > 10000) {
           alert('значение должно быть положительным и меньше 10000');
@@ -187,6 +191,7 @@ $(document).ready( function () {
       default:
         return false;
     }
+    ajdata['req_type'] = base_type;
     $.ajax( {
       type: 'POST',
       data: ajdata,
