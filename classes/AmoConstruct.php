@@ -223,7 +223,6 @@ class AmoConstruct extends CurlReq {
 				'custom_fields' => $custom_fields
 			];
 		}
-		$this->_link.'api/v2/'.$this->_elem_links[$elems[0]->get_type()].PHP_EOL;
 		$this->post($this->_link.'api/v2/'.$this->_elem_links[$elems[0]->get_type()], $data);
 	}
 
@@ -421,24 +420,29 @@ class AmoConstruct extends CurlReq {
 			return TRUE;
 		}
 	}
-	public function createElemsNEW(array $elems){
+
+    /**
+     * @param array $elems AmoElem
+     * @return array AmoElem
+     * @throws Exception
+     */
+    public function createElemsNEW(array $elems){
 		$data = [];		
 		$elem_type = $elems[0]->get_type();
-		var_dump($elems);
 		foreach ($elems as $k => $v) {
 			$data['add'][$k]['name'] = $elems[$k]->get_name();
-			switch (TRUE){
-				case ($elem_type === Company::ELEM_TYPE):
-					$data['add'][$k]['contacts_id'] = $elems[$k]->get_contacts();
-					continue;
+			switch (TRUE) {
 				case ($elem_type === Lead::ELEM_TYPE || $elem_type === Customer::ELEM_TYPE):
 					$data['add'][$k]['company_id'] = $elems[$k]->get_company();
+				case ($elem_type !== Contact::ELEM_TYPE):
+					$data['add'][$k]['contacts_id'] = $elems[$k]->get_contacts();
 					break;
+
 				default:
 					break;
 			}
 		}
-
+		var_dump($data);
 		$result = $this->post($this->_link.'api/v2/'.$this->_elem_links[$elem_type], $data);
 		if (is_array($result)) {
 			$result = $result['_embedded']['items'];
