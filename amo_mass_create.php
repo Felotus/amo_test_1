@@ -1,10 +1,10 @@
 <?php
-function __autoload($className){
-	$className = str_replace( "..", "", $className );
-	require_once( "classes/$className.php" );
-}
 define('ROW_START', 0);
 try {
+	spl_autoload_register(function ($className) {
+		$className = str_replace( "..", "", $className);
+		require_once( "classes/$className.php" );
+	});
 	if (!file_exists('../config.php')) {
 		throw new Exception('Файл конфига не найден', 69);	
 	}

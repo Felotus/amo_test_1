@@ -1,9 +1,5 @@
 <?php
 try {
-	function __autoload($className){
-		$className = str_replace( "..", "", $className );
-		require_once( "classes/$className.php" );
-	}
 	$config = include('../config.php');
 	$amo_us = new AmoConstruct($config['api']);
 	$amo_us->auth($config['akk'], $config['mail'], $config['hash'], $config['max_row']);

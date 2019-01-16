@@ -1,12 +1,7 @@
 <?php
 try {
-	function __autoload($className){
-		$className = str_replace( "..", "", $className );
-		require_once( "classes/$className.php" );
-	}
 	$config = include('../config.php');
 	$field_name = 'новое поле';
-	define('TEXTFIELD_TYPE', 1);
 	$elem_id = DataFilter::clear($_POST['id']);
 	$amo_us = new AmoConstruct($config['api']);
 	$amo_us->auth($config['akk'], $config['mail'], $config['hash'], $config['max_row']);
@@ -29,7 +24,7 @@ try {
 	};
 	$elem->set_id($elem_id);
 	$field = new Field();
-	$field->set_type(TEXTFIELD_TYPE);
+	$field->set_type(Fied::TEXT);
 	$field->set_name($field_name);
 	$field->set_values([DataFilter::clear($_POST['text'])]);
 	$field = $amo_us->findFieldOnType($elem->get_type(), $field);
