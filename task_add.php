@@ -28,9 +28,9 @@ try {
 	};
 	$elem->set_id($elem_id);
 	$task = new Task();
-	$task->get_type(DataFilter::clear($_POST['task_type']));
-	$task->get_val(DataFilter::clear($_POST['text']));
-	$task->get_date(DataFilter::clear($_POST['date']));
+	$task->set_type(DataFilter::clear($_POST['task_type']));
+	$task->set_val(DataFilter::clear($_POST['text']));
+	$task->set_date(DataFilter::clear($_POST['date']));
 	$amo_us->createTask($elem, $task);
 	echo "готово";
 } catch ( Exception $e ) {

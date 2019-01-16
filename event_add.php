@@ -30,6 +30,10 @@ try {
 	$note = new Note();
 	$note->set_type(DataFilter::clear($_POST['note_type']));
 	$note->set_val(DataFilter::clear($_POST['text']));
+	$note->set_call_link('http://example.com/calls/1.mp3');
+	$note->set_call_duration(30);
+	$note->set_origin($config['origin']);
+
 	$amo_us->createNote($elem, $note);
 	echo "готово";
 } catch ( Exception $e ) {

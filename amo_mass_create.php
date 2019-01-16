@@ -54,27 +54,27 @@ try {
 			$elem->set_name($name);
 			$contacts[] = $elem;
 		};
-		$contacts = $amo_us->createContacts($contacts);
+		$contacts = $amo_us->createElemsNEW($contacts);
 		foreach ($contacts as $k => $v) {
 			$companies[$k] = new Company();
 			$companies[$k]->set_name(mt_rand());
 			$companies[$k]->set_contacts([$contacts[$k]->get_id()]);
 		}
-		$companies = $amo_us->createCompanies($companies);
+		$companies = $amo_us->createElemsNEW($companies);
 		foreach ($contacts as $k => $v) {
 			$leads[$k] = new lead();
 			$leads[$k]->set_name(mt_rand());
 			$leads[$k]->set_contacts([$contacts[$k]->get_id()]);
 			$leads[$k]->set_company($companies[$k]->get_id());
 		}
-		$amo_us->createCustLeads($leads);
+		$amo_us->createElemsNEW($leads);
 		foreach ($contacts as $k => $v) {
 			$customers[$k] = new Customer();
 			$customers[$k]->set_name(mt_rand());
 			$customers[$k]->set_contacts([$contacts[$k]->get_id()]);
 			$customers[$k]->set_company($companies[$k]->get_id());
 		}
-		$amo_us->createCustLeads($customers);
+		$amo_us->createElemsNEW($customers);
 	}
 	$start_row = ROW_START;
 	do {
