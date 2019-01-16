@@ -9,19 +9,15 @@ class AmoConstruct extends CurlReq {
 		3 => 'companies',
 		12 => 'customers',
 	];
-	private $_field_types = [
-		'text' => 1,
-		'multiselect' => 5
-	];
 
 
-	/**
-	 * @param string $akk
-	 * @param string $mail
-	 * @param string $hash
-	 * @throws Exception
-	 */
-	public function auth($akk, $mail, $hash){
+    /**
+     * @param sting $akk
+     * @param sting $mail
+     * @param sting $hash
+     * @throws Exception
+     */
+    public function auth($akk, $mail, $hash){
 		$this->_mail = $mail;
 		$this->_hash = $hash;
 		$this->_link = "https://".$akk.".amocrm.ru/";
@@ -67,7 +63,13 @@ class AmoConstruct extends CurlReq {
 		return $field;
 	}
 
-	public function getFieldEnums($elem_type, Field $field){
+    /**
+     * @param int $elem_type
+     * @param Field $field
+     * @return Field
+     * @throws Exception
+     */
+    public function getFieldEnums($elem_type, Field $field){
 		$result = $this->accReq(['custom_fields']);
 		if (is_array($result)) {
 			$result = $result['_embedded']['custom_fields'][$this->_elem_links[$elem_type]][$field->get_id()]['enums'];
@@ -98,9 +100,8 @@ class AmoConstruct extends CurlReq {
 
     /**
      * @param int $first_row
-     * @param $max_row
-     * @return array
-     * @throws Exception
+     * @param int $max_row
+     * @return array AmoElem
      */
     public function getContacts($first_row, $max_row){
 		$elems = [];
@@ -120,7 +121,12 @@ class AmoConstruct extends CurlReq {
 		}
 	}
 
-	public function getleads($first_row, $max_row){
+    /**
+     * @param int $first_row
+     * @param int $max_row
+     * @return array AmoElem
+     */
+    public function getleads($first_row, $max_row){
 		$elems = [];
 		$link = $this->_link.'api/v2/leads?limit_rows='.$max_row.'&limit_offset='.$first_row;
 		$result = $this->get($link);
@@ -137,7 +143,13 @@ class AmoConstruct extends CurlReq {
 			return FALSE;
 		}
 	}
-	public function getCustomer($first_row, $max_row){
+
+    /**
+     * @param int $first_row
+     * @param int $max_row
+     * @return array AmoElem
+     */
+    public function getCustomer($first_row, $max_row){
 		$elems = [];
 		$link = $this->_link.'api/v2/customers?limit_rows='.$max_row.'&limit_offset='.$first_row;
 		$result = $this->get($link);
@@ -157,9 +169,8 @@ class AmoConstruct extends CurlReq {
 
     /**
      * @param int $first_row
-     * @param $int max_row
-     * @return array Company
-     * @throws Exception
+     * @param int $max_row
+     * @return array AmoElem
      */
     public function getCompanies($first_row, $max_row){
 		$elems = [];
@@ -180,7 +191,11 @@ class AmoConstruct extends CurlReq {
 	}
 
 
-	public function updateElems(array $elems){
+    /**
+     * @param array $elems AmoElem
+     * @throws Exception
+     */
+    public function updateElems(array $elems){
 		foreach ($elems as $k => $v) {
             $custom_fields = [];
 			foreach ($v->get_custom_fields() as $val){
@@ -194,7 +209,7 @@ class AmoConstruct extends CurlReq {
 						break;
 
 					default:
-						throw new Exception('Не указан тип поля');
+						throw new Exception('Неизвестный тип поля');
 						break;
 				}
 				$custom_fields[] = [
@@ -208,10 +223,8 @@ class AmoConstruct extends CurlReq {
 				'custom_fields' => $custom_fields
 			];
 		}
-		var_dump($data).PHP_EOL;
-		echo $this->_link.'api/v2/'.$this->_elem_links[$elems[0]->get_type()].PHP_EOL;
-		$result = $this->post($this->_link.'api/v2/'.$this->_elem_links[$elems[0]->get_type()], $data);
-		var_dump($result);
+		$this->_link.'api/v2/'.$this->_elem_links[$elems[0]->get_type()].PHP_EOL;
+		$this->post($this->_link.'api/v2/'.$this->_elem_links[$elems[0]->get_type()], $data);
 	}
 
 	/**
@@ -281,13 +294,14 @@ class AmoConstruct extends CurlReq {
 		return $this->createElems($elems, $data);
 	}
 
-	/**
-	 * @param AmoElem $elem
-	 * @param Field $field
-	 * @return Field
-	 * @throws Exception
-	 */
-	public function findFieldOnType($elem_type, Field $field){
+
+    /**
+     * @param $elem_type
+     * @param Field $field
+     * @return Field
+     * @throws Exception
+     */
+    public function findFieldOnType($elem_type, Field $field){
 		$id = NULL;
 		$enums = NULL;
 		$found = FALSE;
@@ -329,10 +343,10 @@ class AmoConstruct extends CurlReq {
 			'note_type' => $note->get_type()
 		];
 		switch ($note->get_type()) {
-			case '4':
+			case Note::TYPE_NOTE:
 				$data['add'][0]['text'] = $note->get_val();
 				break;
-			case '10':
+			case Note::TYPE_IN_CALL:
 				$data['add'][0]['params']['UNIQ'] = $note->get_origin();
 				$data['add'][0]['params']['DURATION'] = $note->get_call_duration();
 				$data['add'][0]['params']['SRC'] = $note->get_call_link();
@@ -385,14 +399,16 @@ class AmoConstruct extends CurlReq {
 		}
 	}
 
-	/**
-	 * @param Task $task
-	 * @throws Exception
-	 */
-	public function closeTask(Task $task){
+
+    /**
+     * @param Task $task
+     * @return bool
+     * @throws Exception
+     */
+    public function closeTask(Task $task){
 		$data['update'][] = [
 			'id' => $task->get_id(),
-			'is_completed' => 1,
+			'is_completed' => Task::COMPLITED,
 			'updated_at' => time(),
 			'text' => $task->get_val()
 		];
@@ -400,6 +416,37 @@ class AmoConstruct extends CurlReq {
 		if (isset($result['_embedded']['items'][0]['id']) && $result['_embedded']['items'][0]['id'] === 0) {        
 			throw new Exception('не удалось найти элемент', 6);
 		} elseif (!isset($result['_embedded']['items'])) {
+			throw new Exception('Сервер прислал неожиданный ответ', 7);
+		} else {
+			return TRUE;
+		}
+	}
+	public function createElemsNEW(array $elems){
+		$data = [];		
+		$elem_type = $elems[0]->get_type();
+		var_dump($elems);
+		foreach ($elems as $k => $v) {
+			$data['add'][$k]['name'] = $elems[$k]->get_name();
+			switch (TRUE){
+				case ($elem_type === Company::ELEM_TYPE):
+					$data['add'][$k]['contacts_id'] = $elems[$k]->get_contacts();
+					continue;
+				case ($elem_type === Lead::ELEM_TYPE || $elem_type === Customer::ELEM_TYPE):
+					$data['add'][$k]['company_id'] = $elems[$k]->get_company();
+					break;
+				default:
+					break;
+			}
+		}
+
+		$result = $this->post($this->_link.'api/v2/'.$this->_elem_links[$elem_type], $data);
+		if (is_array($result)) {
+			$result = $result['_embedded']['items'];
+			foreach ($result as $k => $v) {
+				$elems[$k]->set_id($v['id']);
+			}
+			return $elems;
+		} else {
 			throw new Exception('Сервер прислал неожиданный ответ', 7);
 		}
 	}

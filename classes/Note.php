@@ -4,8 +4,18 @@ class Note{
 	private $_val;
 	private $_id;
 	private $_origin;
-	private $_call_link = 'http://example.com/calls/1.mp3';
-	private $_call_duration = 30;
+	private $_call_link;
+	private $_call_duration;
+	const TYPE_NOTE = 4;
+	const TYPE_IN_CALL = 10;
+
+	public function set_call_link($value){
+		$this->_call_link = $value;
+	}
+
+	public function set_call_duration($value){
+		$this->_call_duration = $value;
+	}
 
 	public function get_call_link(){
 		return $this->_call_link;

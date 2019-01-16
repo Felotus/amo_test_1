@@ -4,6 +4,7 @@ class Task{
 	private $_type;
 	private $_val;
 	private $_date;
+	const COMPLITED = 1;
 
 	public function set_id($id){
 		$this->_id = $id;
