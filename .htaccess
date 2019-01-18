@@ -1,0 +1,3 @@
+RewriteEngine On
+RewriteCond %{REQUEST_URI} !^\/js/(.*).js
+RewriteRule ^(.*)$ control.php?%{REQUEST_URI} [QSA,L]

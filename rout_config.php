@@ -1,6 +1,9 @@
 <?php
 return [
-	'news' => 'news/index',
-	'products' => 'products/list',
-	'news/archive' => 'news/archive'
+	'task_1' => 'main/massCreate',
+	'task_2' => 'main/changeTextfield',
+	'task_3' => 'main/addEvent',
+	'task_4' => 'main/addTask',
+	'task_5' => 'main/closeTask',
+	'index' => 'main/getView'
 ];
