@@ -1,0 +1,36 @@
+<?php
+try {
+
+	$config = include('../config.php');
+	$elem_name = 'случайное имя';
+	$elem_id = DataFilter::clear($_POST['id']);
+	$amo_us = new AmoConstruct($config['api']);
+	$amo_us->auth($config['akk'], $config['mail'], $config['hash'], $config['max_row']);
+	switch (DataFilter::clear($_POST['elem_type'])) {
+		case Contact::ELEM_TYPE:
+			$elem = new Contact();
+			break;
+		case Company::ELEM_TYPE:
+			$elem = new Company();
+			break;
+		case Lead::ELEM_TYPE:
+			$elem = new Lead();
+			break;
+		case Customer::ELEM_TYPE:
+			$elem = new Customer();
+			break;
+		default:
+			throw new Exception('Элемент не найден', 88);
+			break;
+	};
+	$elem->set_id($elem_id);
+	$task = new Task();
+	$task->set_type(DataFilter::clear($_POST['task_type']));
+	$task->set_val(DataFilter::clear($_POST['text']));
+	$task->set_date(DataFilter::clear($_POST['date']));
+	$amo_us->createTask($elem, $task);
+	echo "готово";
+} catch ( Exception $e ) {
+	echo "Произошла ошибка: ".$e->getMessage().PHP_EOL." Код: ".$e->getCode();
+}
+
