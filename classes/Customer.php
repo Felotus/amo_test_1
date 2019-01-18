@@ -6,9 +6,11 @@ class Customer extends AmoElem{
 
 	public function set_contacts(array $contacts){
 		$this->_contacts = $contacts;
+		return $this;
 	}
 	public function set_company($company){
 		$this->_company = $company;
+		return $this;
 	}
 
 	public function get_contacts(){

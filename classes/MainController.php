@@ -31,11 +31,11 @@ class MainController{
 		$num = DataFilter::clear($_POST['num']);
 		$amo_us = new AmoConstruct($config['api']);
 		$amo_us->auth($config['akk'], $config['mail'], $config['hash']);
-		$multi = new Field();	
+		$multi = new Field();
 		$multi->set_type(Field::MULTISELECT);
-		$multi->set_name($field_name);
-		$multi->set_enums($enums_val);
-		$multi->set_origin($config['origin']);
+		$multi->set_name($field_name)
+			->set_enums($enums_val)
+			->set_origin($config['origin']);
 		$fields = $amo_us->createFields(Contact::ELEM_TYPE, [$multi]);
 		$multi = $fields[0];
 		foreach ($amo_us->getFields(Contact::ELEM_TYPE) as $k => $v) {
@@ -50,33 +50,33 @@ class MainController{
 				$col = $i;
 			}
 			for ($j = 0; $j < $col; $j++) {
-				$elem = new Contact();
 				$name = mt_rand();
 				$data['add'][] = [
 					'name' => $name
 				];
+				$elem = new Contact();
 				$elem->set_name($name);
 				$contacts[] = $elem;
 			};
 			$contacts = $amo_us->createElemsNEW($contacts);
 			foreach ($contacts as $k => $v) {
 				$companies[$k] = new Company();
-				$companies[$k]->set_name(mt_rand());
-				$companies[$k]->set_contacts([$contacts[$k]->get_id()]);
+				$companies[$k]->set_name(mt_rand())
+					->set_contacts([$contacts[$k]->get_id()]);
 			}
 			$companies = $amo_us->createElemsNEW($companies);
 			foreach ($contacts as $k => $v) {
 				$leads[$k] = new lead();
-				$leads[$k]->set_name(mt_rand());
-				$leads[$k]->set_contacts([$contacts[$k]->get_id()]);
-				$leads[$k]->set_company($companies[$k]->get_id());
+				$leads[$k]->set_name(mt_rand())
+					->set_contacts([$contacts[$k]->get_id()])
+					->set_company($companies[$k]->get_id());
 			}
 			$amo_us->createElemsNEW($leads);
 			foreach ($contacts as $k => $v) {
 				$customers[$k] = new Customer();
-				$customers[$k]->set_name(mt_rand());
-				$customers[$k]->set_contacts([$contacts[$k]->get_id()]);
-				$customers[$k]->set_company($companies[$k]->get_id());
+				$customers[$k]->set_name(mt_rand())
+					->set_contacts([$contacts[$k]->get_id()])
+					->set_company($companies[$k]->get_id());
 			}
 			$amo_us->createElemsNEW($customers);
 		}
@@ -93,7 +93,7 @@ class MainController{
 						}			
 					}
 					$multiCont->set_values($enums_data);
-					$result[$key]->set_custom_fields([$multiCont]);
+					$value->set_custom_fields([$multiCont]);
 				}
 				$amo_us->updateElems($result);
 			}
@@ -128,10 +128,10 @@ class MainController{
 		};
 		$elem->set_id($elem_id);
 		$field = new Field();
-		$field->set_id(NULL);
-		$field->set_type(Field::TEXT);
-		$field->set_name($field_name);
-		$field->set_values([DataFilter::clear($_POST['text'])]);
+		$field->set_id(NULL)
+			->set_type(Field::TEXT)
+			->set_name($field_name)
+			->set_values([DataFilter::clear($_POST['text'])]);
 		foreach($amo_us->getFields($elem->get_type()) as $k => $v){
 			if ($v->get_type() === $field->get_type()) {
 				$field->set_id($v->get_id());
@@ -146,6 +146,18 @@ class MainController{
 		$amo_us->updateElems([$elem]);
 		echo 'готово';
 		return TRUE;
+	}
+
+	public function actionDeliteMulti(){
+		$config = $this->get_config();
+		$amo_us = new AmoConstruct($config['api']);
+		$amo_us->auth($config['akk'], $config['mail'], $config['hash']);
+		foreach ($amo_us->getFields(Contact::ELEM_TYPE) as $v) {
+		 	if ($v->get_type() === Field::MULTISELECT){
+		 		$fields[] = $v;
+		 	}
+		}
+		$amo_us->deliteFields($config['origin'], $fields);
 	}
 
 	public function actionAddEvent(){
@@ -173,11 +185,11 @@ class MainController{
 		};
 		$elem->set_id($elem_id);
 		$note = new Note();
-		$note->set_type(DataFilter::clear($_POST['note_type']));
-		$note->set_val(DataFilter::clear($_POST['text']));
-		$note->set_call_link('http://example.com/calls/1.mp3');
-		$note->set_call_duration(30);
-		$note->set_origin($config['origin']);
+		$note->set_type(DataFilter::clear($_POST['note_type']))
+			->set_val(DataFilter::clear($_POST['text']))
+			->set_call_link('http://example.com/calls/1.mp3')
+			->set_call_duration(30)
+			->set_origin($config['origin']);
 
 		$amo_us->createNote($elem, $note);
 		echo 'готово';
@@ -209,9 +221,9 @@ class MainController{
 		};
 		$elem->set_id($elem_id);
 		$task = new Task();
-		$task->set_type(DataFilter::clear($_POST['task_type']));
-		$task->set_val(DataFilter::clear($_POST['text']));
-		$task->set_date(DataFilter::clear($_POST['date']));
+		$task->set_type(DataFilter::clear($_POST['task_type']))
+			->set_val(DataFilter::clear($_POST['text']))
+			->set_date(DataFilter::clear($_POST['date']));
 		$amo_us->createTask($elem, $task);
 		echo 'готово';
 		return TRUE;
@@ -222,8 +234,8 @@ class MainController{
 		$amo_us = new AmoConstruct($config['api']);
 		$amo_us->auth($config['akk'], $config['mail'], $config['hash']);
 		$task = new Task();
-		$task->set_val(DataFilter::clear($_POST['text']));
-		$task->set_id(DataFilter::clear($_POST['id']));
+		$task->set_val(DataFilter::clear($_POST['text']))
+			->set_id(DataFilter::clear($_POST['id']));
 		$amo_us->updateTask($task);
 		echo 'готово';
 		return TRUE;

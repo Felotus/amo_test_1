@@ -8,15 +8,19 @@ class Task{
 
 	public function set_id($id){
 		$this->_id = $id;
+		return $this;
 	}
 	public function set_val($val){
 		$this->_val = $val;
+		return $this;
 	}
 	public function set_date($date){
 		$this->_date = $date;
+		return $this;
 	}
 	public function set_type($type){
 		$this->_type = $type;
+		return $this;
 	}
 
 

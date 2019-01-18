@@ -115,7 +115,7 @@ class AmoConstruct extends CurlReq {
 			$result = $result['_embedded']['items'];
 			foreach ($result as $key => $value) {
 				$elem = new lead();
-				$elem->set_id($value['id']);
+				$elem->sid($value['id']);
 				$elems[] = $elem;
 			}
 			return $elems;
@@ -182,7 +182,7 @@ class AmoConstruct extends CurlReq {
 				$values = $val->get_values();
 				switch ($val->get_type()) {
 					case Field::TEXT:
-						$values[] = ['value' => $values[0]];
+						$values[0] = ['value' => $values[0]];
 						break;
 					
 					case Field::MULTISELECT:
@@ -275,7 +275,7 @@ class AmoConstruct extends CurlReq {
 
 
 
-	public function getFields($elem_type){
+	public function getFields($elem_type = NULL){
 		$id = NULL;
 		$enums = NULL;
 		$fields = [];
@@ -288,10 +288,10 @@ class AmoConstruct extends CurlReq {
 					$enums = $value['enums'];
 				}
 				$field = new Field();
-				$field->set_name($value['name']);
-				$field->set_enums($enums);
-				$field->set_id($key);
-				$field->set_type($value['field_type']);
+				$field->set_name($value['name'])
+					->set_enums($enums)
+					->set_id($key)
+					->set_type($value['field_type']);
 				$fields[] = $field;
 			} 
 		} else {
@@ -422,5 +422,17 @@ class AmoConstruct extends CurlReq {
 		} else {
 			throw new Exception('Сервер прислал неожиданный ответ', 7);
 		}
+	}
+
+	public function deliteFields($origin, array $fields) {
+		$data = [];
+		foreach ($fields as $v) {
+			$data['delete'][] = [
+				'id' => $v->get_id(),
+				'origin' => $origin
+			];
+		}
+		return $this->post($this->_link.'api/v2/fields', $data);
+
 	}
 }
