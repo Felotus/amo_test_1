@@ -1,8 +1,13 @@
 <?php
 include_once('autoload.php');
-try {
+try {	
+	if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+		$control = new MainController();
+		$control->actionGetView();
+	} else {
 		$router = new Router();
 		$router->run();
+	}
 } catch ( Exception $e ) {
 	echo json_encode([$e->getCode() => $e->getMessage()]);
 }
