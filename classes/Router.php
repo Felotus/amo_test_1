@@ -2,20 +2,18 @@
 class Router{
 	private $_routes;
 
-	public function runControl($conrollName){
-		$conrollName = str_replace('..', '', $conrollName);
-		require_once("$conrollName.php");
-	}
 
-	//ниже тестовые методы
 	public function __construct(){
 		$routPath = $_SERVER['DOCUMENT_ROOT'].'/rout_config.php';
 		$this->_routes = include($routPath);
 	}
 
 	private function getURI(){
-		if (!empty($_SERVER['REQUEST_URI'])) {
-			return trim($_SERVER['REQUEST_URI'], '/');
+		$uri = trim($_SERVER['REQUEST_URI'], '/');
+		if (!empty($uri)) {
+			return $uri;
+		} else {
+			return 'index';
 		}
 	}
 
@@ -26,11 +24,9 @@ class Router{
 				$segments = explode('/', $path);
 				$controllerName = ucfirst(array_shift($segments)).'Controller';
 				$actionName = 'action'.ucfirst(array_shift($segments));
-				echo 'Класс: '.$controllerName.'</br>';
-				echo 'Метод: '.$actionName;
+				$controller = new $controllerName;
+				$controller->$actionName();
 			}
 		}
-
 	}
-
 }

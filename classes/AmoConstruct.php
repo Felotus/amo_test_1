@@ -29,61 +29,41 @@ class AmoConstruct extends CurlReq {
 		$result = $this->post($link, $data);
 		$result = $result['response'];
 		if (!isset($result['auth'])) {
-			throw new Exception('Авторизация не прошла', 666);
+			return FALSE;
+		} else {
+			return TRUE;
 		}
 
 	}
 
 	/**
 	 * @param int $elem_type
-	 * @param Field $field
+	 * @param array Field $fields
 	 * @return Field
 	 * @throws Exception
 	 */
-	public function createField($elem_type, Field $field){
-		$field_id = NULL;
-		$enums = NULL;
-		$data['add'][] = [
-			'name' => $field->get_name(),
-			'field_type'=> $field->get_type(),
-			'element_type' => $elem_type,
-			'origin' => $field->get_origin(),
-			'enums' => $field->get_enums(),
-			'is_editable' => $field->get_editable()
-		];
+	public function createFields($elem_type, array $fields){
+		foreach ($fields as $value) {
+			$data['add'][] = [
+				'name' => $value->get_name(),
+				'field_type'=> $value->get_type(),
+				'element_type' => $elem_type,
+				'origin' => $value->get_origin(),
+				'enums' => $value->get_enums(),
+				'is_editable' => $value->get_editable()
+			];
+		}
 		$result = $this->post($this->_link.'api/v2/fields', $data);
 		if (is_array($result)) {
 			$result = $result['_embedded']['items'];
-			foreach($result as $v){
-				$field->set_id($v['id']);
+			foreach ($result as $k => $v) {
+				$fields[$k]->set_id($v['id']);
 			}
 		} else {
 			throw new Exception('Сервер прислал неожиданный ответ', 7);
 		}
-		return $field;
+		return $fields;
 	}
-
-    /**
-     * @param int $elem_type
-     * @param Field $field
-     * @return Field
-     * @throws Exception
-     */
-    public function getFieldEnums($elem_type, Field $field){
-		$result = $this->accReq(['custom_fields']);
-		if (is_array($result)) {
-			$result = $result['_embedded']['custom_fields'][$this->_elem_links[$elem_type]][$field->get_id()]['enums'];
-			foreach ($result as $key => $value) {
-				$enums[$key] = $value;
-			}
-		} else {
-			throw new Exception('Сервер прислал неожиданный ответ', 7);
-		}
-		$field->set_enums($enums);
-		return $field;
-	}
-
-
 
 	/**
 	 * @param array|null $params
@@ -294,40 +274,30 @@ class AmoConstruct extends CurlReq {
 	}
 
 
-    /**
-     * @param $elem_type
-     * @param Field $field
-     * @return Field
-     * @throws Exception
-     */
-    public function findFieldOnType($elem_type, Field $field){
+
+	public function getFields($elem_type){
 		$id = NULL;
 		$enums = NULL;
-		$found = FALSE;
+		$fields = [];
 		$result = $this->accReq(['custom_fields']);
 		if (is_array($result)) {
 			$result = $result['_embedded']['custom_fields'][$this->_elem_links[$elem_type]];
 			foreach ($result as $key => $value) {
-				if ($value['field_type'] === $field->get_type()) {
-					$id = $key;
-					$name = $value['name'];
-					if (isset($value['enums'])){
-						$enums = $value['enums'];
-					}
-					$field->set_name($name);
-					$field->set_enums($enums);
-					$field->set_id($id);
-					$found = TRUE;
-					break;
+				$name = $value['name'];
+				if (isset($value['enums'])){
+					$enums = $value['enums'];
 				}
+				$field = new Field();
+				$field->set_name($value['name']);
+				$field->set_enums($enums);
+				$field->set_id($key);
+				$field->set_type($value['field_type']);
+				$fields[] = $field;
 			} 
 		} else {
 			throw new Exception('Сервер прислал неожиданный ответ',7);
 		}
-		if ($found === FALSE) {
-			$field->set_id($id);
-		}
-		return $field;
+		return $fields;
 	}
 
 	/**
@@ -384,7 +354,7 @@ class AmoConstruct extends CurlReq {
 	 */
 	public function createTask(AmoElem $elem, Task $task){
 		$data['add'][] = [
-			'element_id' => $elem->get_id(),
+			'element_id' => $elem-> get_id(),
 			'element_type' => $elem->get_type(),
 			'task_type' => $task->get_type(),
 			'complete_till' => $task->get_date(),
@@ -404,7 +374,7 @@ class AmoConstruct extends CurlReq {
      * @return bool
      * @throws Exception
      */
-    public function closeTask(Task $task){
+    public function updateTask(Task $task){
 		$data['update'][] = [
 			'id' => $task->get_id(),
 			'is_completed' => Task::COMPLITED,
@@ -442,7 +412,6 @@ class AmoConstruct extends CurlReq {
 					break;
 			}
 		}
-		var_dump($data);
 		$result = $this->post($this->_link.'api/v2/'.$this->_elem_links[$elem_type], $data);
 		if (is_array($result)) {
 			$result = $result['_embedded']['items'];
