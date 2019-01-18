@@ -148,7 +148,7 @@ $(document).ready( function () {
           alert('заполните все поля');
           return false;
         }
-        req_url += 'control.php/task_4';
+        req_url = 'control.php/task_4';
         let cur_time = (Date.parse(inp_date1.val())/1000);
         ajdata = {
           id: inp_num1.val(),
@@ -164,7 +164,7 @@ $(document).ready( function () {
           alert('заполните все поля');
           return false;
         }
-        req_url = 'control.php//task_5';
+        req_url = 'control.php/task_5';
         ajdata = {
           id: inp_num1.val(),
           text: inp_textar1.val()
