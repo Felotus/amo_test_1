@@ -7,7 +7,8 @@ $(document).ready( function () {
     inp_date1 = $('#date1'),
     inp_phone1 = $('#phone1'),
     inp_num1 = $('#num1'),
-    inp_but1 = $('#but1');
+    inp_but1 = $('#but1'),
+    req_url;
   $('#sel1 option:eq(1)').prop('selected', true);
   sel_base.prop('selected', true);
   sel_el_type.hide();
@@ -16,23 +17,6 @@ $(document).ready( function () {
   inp_textar1.hide();
   inp_date1.hide();
   inp_phone1.hide();
-  ajdata = {
-    req_type: '0'
-  },
-  $.ajax( {
-    type: 'POST',
-    url: 'control.php',
-    data: ajdata,
-    success: function (msg) {
-      msg = JSON.parse(msg);
-      $.each(msg, function (key, value) {
-        sel_task_type.append($('<option>', {
-          value: key,
-          text: value,
-        }));
-      })
-    }
-  });
   sel_note_type.change( function () {
     if (sel_note_type.find(":selected").val() === '4') {
       inp_textar1.show();
@@ -109,9 +93,8 @@ $(document).ready( function () {
         inp_num1.attr("placeholder", 'количество элементов');
     }
   });
-
   inp_but1.on("click", function () {
-    ajdata,
+    var ajdata;
     base_type = sel_base.find(":selected").val();
     switch (base_type) {
       case '1':
@@ -119,10 +102,10 @@ $(document).ready( function () {
           alert('значение должно быть положительным и меньше 10000');
           return false;
         }
-        link = 'amo_mass_create.php';
         ajdata = {
           num: inp_num1.val()
         };
+        req_url = 'control.php/task_1';
         break;
 
       case '2':
@@ -130,21 +113,21 @@ $(document).ready( function () {
           alert('заполните все поля');
           return false;
         }
-        link = 'textfield_create.php';
         ajdata = {
           id: inp_num1.val(),
           elem_type: sel_el_type.find(":selected").val(),
           text: inp_textar1.val()
         };
+        req_url = 'control.php/task_2';
         break;
 
       case '3':
-        link = 'event_add.php';
         ajdata = {
           id: inp_num1.val(),
           elem_type: sel_el_type.find(":selected").val(),
           note_type: sel_note_type.find(":selected").val()
         };
+        req_url = 'control.php/task_3';
         if (sel_note_type.find(":selected").val() === '4') {
           if ( !inp_num1.val() || !inp_textar1.val()) {
             alert('заполните все поля');
@@ -165,7 +148,7 @@ $(document).ready( function () {
           alert('заполните все поля');
           return false;
         }
-        link = 'task_add.php';
+        req_url += 'control.php/task_4';
         let cur_time = (Date.parse(inp_date1.val())/1000);
         ajdata = {
           id: inp_num1.val(),
@@ -181,7 +164,7 @@ $(document).ready( function () {
           alert('заполните все поля');
           return false;
         }
-        link = 'task_close.php';
+        req_url = 'control.php//task_5';
         ajdata = {
           id: inp_num1.val(),
           text: inp_textar1.val()
@@ -191,11 +174,10 @@ $(document).ready( function () {
       default:
         return false;
     }
-    ajdata['req_type'] = base_type;
-    $.ajax( {
+    $.ajax({
       type: 'POST',
       data: ajdata,
-      url: link,
+      url: req_url,
       beforeSend: function () {
         inp_but1.attr('disabled', true);
       },
